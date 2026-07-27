@@ -107,6 +107,9 @@ const Files = {
   },
   
   getAccessToken() {
+    if (!DMS.googleAccessToken) {
+      DMS.googleAccessToken = sessionStorage.getItem('googleAccessToken');
+    }
     return DMS.googleAccessToken;
   },
   
@@ -115,6 +118,9 @@ const Files = {
     const fileInput = document.getElementById(fileInputId);
     
     if (!dropZone || !fileInput) return;
+
+    // Reset pending files array
+    DMS.pendingFiles = [];
 
     dropZone.addEventListener('click', () => fileInput.click());
     
@@ -132,14 +138,32 @@ const Files = {
       e.preventDefault();
       dropZone.classList.remove('drop-zone-active');
       if (e.dataTransfer.files.length) {
-        fileInput.files = e.dataTransfer.files;
-        this.renderFilePreview(fileInput.files, previewId);
+        this.addPendingFiles(e.dataTransfer.files, previewId);
       }
     });
 
     fileInput.addEventListener('change', () => {
-      this.renderFilePreview(fileInput.files, previewId);
+      if (fileInput.files.length) {
+        this.addPendingFiles(fileInput.files, previewId);
+        fileInput.value = ''; // Reset input to allow choosing same file
+      }
     });
+  },
+
+  addPendingFiles(fileList, previewId) {
+    for (let i = 0; i < fileList.length; i++) {
+      const file = fileList[i];
+      // Prevent duplicate files in the preview list
+      if (!DMS.pendingFiles.some(f => f.name === file.name && f.size === file.size)) {
+        DMS.pendingFiles.push(file);
+      }
+    }
+    this.renderFilePreview(DMS.pendingFiles, previewId);
+  },
+
+  removePendingFile(index, previewId) {
+    DMS.pendingFiles.splice(index, 1);
+    this.renderFilePreview(DMS.pendingFiles, previewId);
   },
 
   renderFilePreview(files, previewId) {
@@ -151,15 +175,18 @@ const Files = {
       return;
     }
 
-    const html = Array.from(files).map(file => `
+    const html = files.map((file, idx) => `
       <div class="file-preview-item">
         <div class="file-preview-left">
-          <span class="file-preview-icon">${getFileIcon(file.type || file.name)}</span>
+          <span class="file-preview-icon">${getFileIcon(file.type || file.name.split('.').pop())}</span>
           <div>
             <div class="file-preview-name">${escapeHtml(file.name)}</div>
             <div class="file-preview-size">${formatFileSize(file.size)}</div>
           </div>
         </div>
+        <button type="button" onclick="Files.removePendingFile(${idx}, '${previewId}')" class="btn-icon btn-icon-danger" title="เอาออก" style="padding: 0.25rem 0.5rem; font-size: 1rem;">
+          ✕
+        </button>
       </div>
     `).join('');
 

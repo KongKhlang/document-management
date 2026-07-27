@@ -63,7 +63,19 @@ const Users = {
         return;
       }
 
-      let html = '<div class="overflow-x-auto"><table class="w-full text-left border-collapse"><thead><tr class="border-b border-slate-700 text-slate-400 text-sm"><th class="p-4">ผู้ใช้</th><th class="p-4">สิทธิ์</th><th class="p-4">สถานะ</th><th class="p-4 text-right">จัดการ</th></tr></thead><tbody>';
+      let html = `
+        <div style="overflow-x: auto; background: var(--bg-card); border-radius: var(--radius-lg); border: 1px solid var(--card-border); box-shadow: var(--shadow-sm); padding: 0.5rem 1rem;">
+          <table style="width: 100%; border-collapse: collapse; text-align: left;">
+            <thead>
+              <tr style="border-bottom: 2px solid var(--card-border); color: var(--text-secondary); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+                <th style="padding: 1rem 0.75rem;">ผู้ใช้</th>
+                <th style="padding: 1rem 0.75rem;">สิทธิ์</th>
+                <th style="padding: 1rem 0.75rem;">สถานะ</th>
+                <th style="padding: 1rem 0.75rem; text-align: right;">จัดการ</th>
+              </tr>
+            </thead>
+            <tbody>
+      `;
       snapshot.forEach(doc => {
         html += this.renderUserRow({ id: doc.id, ...doc.data() });
       });
@@ -157,22 +169,22 @@ const Users = {
   renderPendingCard(user) {
     const photo = user.photoURL || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.email);
     return `
-      <div class="bg-slate-800/50 p-4 rounded-lg flex flex-col md:flex-row items-center justify-between gap-4 mb-4">
-        <div class="flex items-center gap-4 w-full md:w-auto">
-          <img src="${escapeHtml(photo)}" class="w-12 h-12 rounded-full object-cover">
+      <div class="user-card" style="margin-bottom: 1rem;">
+        <div class="flex items-center gap-4" style="flex: 1;">
+          <img src="${escapeHtml(photo)}" class="user-avatar-lg" style="width: 50px; height: 50px;">
           <div>
-            <div class="font-medium text-white">${escapeHtml(user.displayName || user.email)}</div>
-            <div class="text-sm text-slate-400">${escapeHtml(user.email)}</div>
+            <div class="user-name">${escapeHtml(user.displayName || user.email)}</div>
+            <div class="user-email">${escapeHtml(user.email)}</div>
           </div>
         </div>
-        <div class="flex items-center gap-2 w-full md:w-auto">
-          <select id="role-select-${escapeHtml(user.id)}" class="bg-slate-700 text-white rounded px-3 py-2 text-sm border-none focus:ring-1 focus:ring-indigo-500">
+        <div class="flex items-center gap-2">
+          <select id="role-select-${escapeHtml(user.id)}" class="form-select" style="width: 120px; padding: 0.5rem; margin-right: 0.5rem;">
             <option value="viewer">Viewer</option>
             <option value="editor">Editor</option>
             <option value="admin">Admin</option>
           </select>
-          <button onclick="Users.approveUser('${escapeHtml(user.id)}')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded text-sm transition-colors">อนุมัติ</button>
-          <button onclick="Users.rejectUser('${escapeHtml(user.id)}')" class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded text-sm transition-colors">ปฏิเสธ</button>
+          <button onclick="Users.approveUser('${escapeHtml(user.id)}')" class="btn-primary btn-sm">อนุมัติ</button>
+          <button onclick="Users.rejectUser('${escapeHtml(user.id)}')" class="btn-secondary btn-sm">ปฏิเสธ</button>
         </div>
       </div>
     `;
@@ -182,33 +194,33 @@ const Users = {
     const photo = user.photoURL || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.email);
     const isMe = user.id === DMS.currentUser.uid;
     const statusBadge = user.status === 'suspended' 
-      ? '<span class="px-2 py-1 rounded bg-red-500/20 text-red-400 text-xs">ระงับ</span>'
-      : '<span class="px-2 py-1 rounded bg-green-500/20 text-green-400 text-xs">ปกติ</span>';
+      ? '<span class="role-badge" style="background: rgba(239,68,68,0.1); color: var(--danger-color);">ระงับ</span>'
+      : '<span class="role-badge" style="background: rgba(16,185,129,0.1); color: var(--success-color);">ปกติ</span>';
 
     return `
-      <tr class="border-b border-slate-700/50 hover:bg-slate-800/30 transition-colors">
-        <td class="p-4">
+      <tr style="border-bottom: 1px solid var(--card-border); transition: background var(--transition);">
+        <td style="padding: 1rem 0.75rem;">
           <div class="flex items-center gap-3">
-            <img src="${escapeHtml(photo)}" class="w-8 h-8 rounded-full">
+            <img src="${escapeHtml(photo)}" class="user-avatar" style="width: 36px; height: 36px; border: none; box-shadow: none;">
             <div>
-              <div class="font-medium text-white">${escapeHtml(user.displayName || user.email)}</div>
-              <div class="text-xs text-slate-400">${escapeHtml(user.email)}</div>
+              <div class="user-name" style="font-size: 0.95rem;">${escapeHtml(user.displayName || user.email)}</div>
+              <div class="user-email" style="font-size: 0.78rem;">${escapeHtml(user.email)}</div>
             </div>
           </div>
         </td>
-        <td class="p-4">
-          <select onchange="Users.changeRole('${escapeHtml(user.id)}', this.value)" ${isMe ? 'disabled' : ''} class="bg-slate-700 text-white rounded px-2 py-1 text-sm border-none">
+        <td style="padding: 1rem 0.75rem;">
+          <select onchange="Users.changeRole('${escapeHtml(user.id)}', this.value)" ${isMe ? 'disabled' : ''} class="form-select" style="padding: 0.4rem 0.85rem; font-size: 0.85rem;">
             <option value="viewer" ${user.role === 'viewer' ? 'selected' : ''}>Viewer</option>
             <option value="editor" ${user.role === 'editor' ? 'selected' : ''}>Editor</option>
             <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
           </select>
         </td>
-        <td class="p-4">${statusBadge}</td>
-        <td class="p-4 text-right">
+        <td style="padding: 1rem 0.75rem;">${statusBadge}</td>
+        <td style="padding: 1rem 0.75rem; text-align: right;">
           ${!isMe ? (
             user.status === 'suspended' 
-            ? `<button onclick="Users.unsuspendUser('${escapeHtml(user.id)}')" class="text-green-400 hover:text-green-300 text-sm">ยกเลิกระงับ</button>`
-            : `<button onclick="Users.suspendUser('${escapeHtml(user.id)}')" class="text-red-400 hover:text-red-300 text-sm">ระงับ</button>`
+            ? `<button onclick="Users.unsuspendUser('${escapeHtml(user.id)}')" class="btn-secondary btn-sm" style="color: var(--success-color); border-color: rgba(16,185,129,0.2);">ยกเลิกระงับ</button>`
+            : `<button onclick="Users.suspendUser('${escapeHtml(user.id)}')" class="btn-danger btn-sm">ระงับ</button>`
           ) : ''}
         </td>
       </tr>

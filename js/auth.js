@@ -25,6 +25,8 @@ const Auth = {
     try {
       const result = await DMS.auth.signInWithPopup(provider);
       DMS.googleAccessToken = result.credential.accessToken;
+      // Persist access token in sessionStorage for page refreshes
+      sessionStorage.setItem('googleAccessToken', result.credential.accessToken);
     } catch (err) { 
       showToast('เข้าสู่ระบบล้มเหลว: ' + err.message, 'error'); 
     }
@@ -32,6 +34,9 @@ const Auth = {
 
   async handleSignedIn(user) {
     try {
+      // Re-hydrate the access token from session storage on refresh
+      DMS.googleAccessToken = sessionStorage.getItem('googleAccessToken');
+
       const userRef = DMS.db.collection('users').doc(user.uid);
       const userDoc = await userRef.get();
 

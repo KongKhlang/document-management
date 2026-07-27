@@ -82,20 +82,20 @@ const Categories = {
       const isAdminOrEditor = DMS.currentUser.role === 'admin' || DMS.currentUser.role === 'editor';
       
       let nodeHtml = `
-        <div class="flex items-center justify-between p-3 bg-slate-800/50 rounded mb-2 border border-slate-700/50 hover:border-slate-600 transition-colors" style="margin-left: ${padding}rem">
-          <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded flex items-center justify-center text-xl" style="background-color: ${node.color || '#6366f1'}40; color: ${node.color || '#6366f1'}">
+        <div class="category-card" style="margin-left: ${padding}rem; margin-bottom: 0.5rem; width: auto; background: var(--bg-card); border: 1px solid var(--card-border); padding: 0.85rem 1.25rem;">
+          <div class="flex items-center gap-3" style="flex: 1;">
+            <div class="category-icon-circle" style="background-color: ${node.color || '#6366f1'}20; color: ${node.color || '#6366f1'}; width: 42px; height: 42px; font-size: 1.25rem;">
               ${node.icon || '📁'}
             </div>
             <div>
-              <div class="text-white font-medium">${escapeHtml(node.name)}</div>
-              <div class="text-xs text-slate-400">${node.topicCount || 0} เอกสาร</div>
+              <div class="category-name" style="font-size: 0.95rem;">${escapeHtml(node.name)}</div>
+              <div class="category-count" style="font-size: 0.78rem;">${node.topicCount || 0} เอกสาร</div>
             </div>
           </div>
           ${isAdminOrEditor ? `
-          <div class="flex gap-2">
-            <button onclick="Categories.showCategoryModal('${escapeHtml(node.id)}')" class="p-2 text-slate-400 hover:text-indigo-400 transition-colors" title="แก้ไข">✏️</button>
-            <button onclick="Categories.deleteCategory('${escapeHtml(node.id)}')" class="p-2 text-slate-400 hover:text-red-400 transition-colors" title="ลบ">🗑️</button>
+          <div class="category-actions">
+            <button onclick="Categories.showCategoryModal('${escapeHtml(node.id)}')" class="btn-icon" title="แก้ไข" style="font-size: 0.95rem;">✏️</button>
+            <button onclick="Categories.deleteCategory('${escapeHtml(node.id)}')" class="btn-icon btn-icon-danger" title="ลบ" style="font-size: 0.95rem;">🗑️</button>
           </div>
           ` : ''}
         </div>

@@ -43,10 +43,11 @@ const Topics = {
     });
 
     bindClick('btnAddViewer', () => {
-      const input = document.getElementById('viewerEmailInput');
-      if(input && input.value) {
-        this.addViewer(input.value.trim());
-        input.value = '';
+      const select = document.getElementById('viewerEmailSelect');
+      if(select && select.value) {
+        this.addViewer(select.value);
+        // Leave it selected or reset it
+        select.value = '';
       }
     });
 
@@ -256,7 +257,7 @@ const Topics = {
       if(titleEl) titleEl.textContent = topic.title;
       if(descEl) descEl.textContent = topic.description || '-';
       if(dateEl) dateEl.textContent = formatDateTime(topic.updatedAt);
-      if(creatorEl) creatorEl.textContent = topic.createdByName || topic.createdByEmail;
+      if(creatorEl) creatorEl.textContent = topic.createdByName || topic.createdByEmail || 'ผู้ใช้ระบบ';
       
       const cat = Categories.getCategoryById(topic.categoryId);
       if(catEl) {
@@ -308,7 +309,7 @@ const Topics = {
                   <div class="file-icon" style="color: ${getFileTypeColor(f.fileType)}">${getFileIcon(f.fileType)}</div>
                   <div>
                     <a href="${f.driveViewUrl || '#'}" target="_blank" class="file-name">${escapeHtml(f.fileName)}</a>
-                    <div class="file-meta">${formatFileSize(f.fileSize)} • อัปโหลดเมื่อ ${formatDate(f.uploadedAt)}</div>
+                    <div class="file-meta">${formatFileSize(f.fileSize)} • อัปโหลดเมื่อ ${formatDateTime(f.uploadedAt)}</div>
                   </div>
                 </div>
                 <div class="file-actions">
@@ -334,33 +335,28 @@ const Topics = {
     }
   },
 
-  // ⭐ Missing function: Delete individual file from a topic
   async deleteFile(topicId, fileId, driveFileId, fileSize) {
     if (!confirm('ยืนยันการลบไฟล์นี้?')) return;
     
     try {
-      // Delete from Firestore subcollection
       await DMS.db.collection('topics').doc(topicId).collection('files').doc(fileId).delete();
       
-      // Update topic counters
       await DMS.db.collection('topics').doc(topicId).update({
         fileCount: firebase.firestore.FieldValue.increment(-1),
         totalSize: firebase.firestore.FieldValue.increment(-(fileSize || 0))
       });
       
-      // Delete from Google Drive
       try {
         await Files.deleteFile(driveFileId);
       } catch (driveErr) {
         console.warn('Failed to delete from Drive:', driveErr);
       }
 
-      // Log activity
       await DMS.db.collection('activityLog').add({
         action: 'delete_file',
         topicId: topicId,
         userId: DMS.currentUser.uid,
-        userName: DMS.currentUser.displayName,
+        userName: DMS.currentUser.displayName || DMS.currentUser.email,
         details: `ลบไฟล์ออกจากเอกสาร`,
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
       });
@@ -374,7 +370,6 @@ const Topics = {
     }
   },
 
-  // ⭐ Upload more files to existing topic
   async handleUploadMore() {
     if (!DMS.currentTopicId) return;
     
@@ -400,7 +395,6 @@ const Topics = {
           const upRes = uploadResults[i];
           if (!upRes) continue;
           
-          // Find the original file that matches this result
           const origFile = files[i];
           const fileRef = DMS.db.collection('topics').doc(DMS.currentTopicId).collection('files').doc();
           batch.set(fileRef, {
@@ -426,7 +420,6 @@ const Topics = {
           updatedAt: now
         });
 
-        // Sync permissions if restricted
         if (DMS.currentTopicData?.visibility === 'restricted') {
           const allEmails = [DMS.currentUser.email, ...(DMS.currentTopicData.allowedViewers || [])];
           await DrivePermissions.syncPermissions(DMS.currentTopicId, allEmails);
@@ -444,7 +437,6 @@ const Topics = {
     input.click();
   },
 
-  // ⭐ Share modal
   openShareModal() {
     if (!DMS.currentTopicData) return;
     const topic = DMS.currentTopicData;
@@ -498,7 +490,6 @@ const Topics = {
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
       });
       
-      // Sync to Google Drive if checkbox is checked
       const syncCheckbox = document.getElementById('syncDriveCheckbox');
       if (syncCheckbox?.checked) {
         const allEmails = [DMS.currentUser.email, ...DMS.shareViewers];
@@ -507,13 +498,34 @@ const Topics = {
       
       showToast('บันทึกสิทธิ์การเข้าถึงสำเร็จ');
       hideModal('shareModal');
-      
-      // Refresh detail
       this.loadTopicDetail(DMS.currentTopicId);
       
     } catch (error) {
       console.error('Save share error:', error);
       showToast('เกิดข้อผิดพลาดในการบันทึก', 'error');
+    }
+  },
+
+  async loadAllowedUsersSelect() {
+    try {
+      const select = document.getElementById('viewerEmailSelect');
+      if (!select) return;
+      
+      const snapshot = await DMS.db.collection('users')
+        .where('status', '==', 'approved')
+        .get();
+        
+      let html = '<option value="">-- เลือกผู้ใช้จากระบบ --</option>';
+      snapshot.forEach(doc => {
+        const u = doc.data();
+        if (u.email !== DMS.currentUser.email) {
+          const name = u.displayName ? `${u.displayName} (${u.email})` : u.email;
+          html += `<option value="${escapeHtml(u.email)}">${escapeHtml(name)}</option>`;
+        }
+      });
+      select.innerHTML = html;
+    } catch (err) {
+      console.error('Error loading allowed users list:', err);
     }
   },
 
@@ -525,18 +537,18 @@ const Topics = {
     Categories.renderCategorySelect('topicCategorySelect', topic ? topic.categoryId : null);
     
     document.getElementById('topicFilePreview').innerHTML = '';
+    DMS.pendingFiles = []; // Reset pending files queue
     DMS.tempAllowedViewers = [];
     this.tempTags = [];
     
     const fileInput = document.getElementById('topicFileInput');
     if (fileInput) fileInput.value = '';
 
+    // Always keep dropzone visible so editors can attach files during edit
     const dropZone = document.getElementById('topicDropZone');
-    if (topic) {
-      if(dropZone) dropZone.classList.add('hidden');
-    } else {
-      if(dropZone) dropZone.classList.remove('hidden');
-    }
+    if (dropZone) dropZone.classList.remove('hidden');
+
+    this.loadAllowedUsersSelect();
 
     if (topic) {
       document.getElementById('topicTitleInput').value = topic.title;
@@ -558,7 +570,6 @@ const Topics = {
     showModal('topicModal');
   },
 
-  // Tags management
   removeTag(tag) {
     this.tempTags = this.tempTags.filter(t => t !== tag);
     this.renderTagsList();
@@ -614,9 +625,9 @@ const Topics = {
       return;
     }
 
-    const fileInput = document.getElementById('topicFileInput');
-    const files = fileInput ? fileInput.files : [];
+    const files = DMS.pendingFiles || [];
     
+    // Require files only when creating a new topic
     if (!DMS.editingTopicId && files.length === 0) {
       showToast('กรุณาเลือกไฟล์อย่างน้อย 1 ไฟล์', 'warning');
       return;
@@ -650,10 +661,10 @@ const Topics = {
       let topicId = DMS.editingTopicId;
 
       if (!topicId) {
-        // Create new
+        // Create new — include uploader and time stamp metadata
         topicData.createdBy = DMS.currentUser.uid;
         topicData.createdByEmail = DMS.currentUser.email;
-        topicData.createdByName = DMS.currentUser.displayName;
+        topicData.createdByName = DMS.currentUser.displayName || DMS.currentUser.email;
         topicData.createdAt = now;
         topicData.isDeleted = false;
         topicData.fileCount = 0;
@@ -662,7 +673,6 @@ const Topics = {
         const docRef = await DMS.db.collection('topics').add(topicData);
         topicId = docRef.id;
         
-        // Update category count
         await DMS.db.collection('categories').doc(categoryId).update({
           topicCount: firebase.firestore.FieldValue.increment(1)
         }).catch(() => {});
@@ -671,7 +681,7 @@ const Topics = {
         await DMS.db.collection('topics').doc(topicId).update(topicData);
       }
 
-      // Handle files upload
+      // Handle files upload from pendingFiles list
       if (files.length > 0) {
         const uploadResults = await Files.uploadMultipleFiles(files, DRIVE_FOLDER_ID);
         
@@ -679,12 +689,10 @@ const Topics = {
         let addedCount = 0;
         const batch = DMS.db.batch();
         
-        // ⭐ Fixed: iterate over uploadResults, not files, to avoid index mismatch
         for (let i = 0; i < uploadResults.length; i++) {
           const upRes = uploadResults[i];
           if(!upRes) continue;
           
-          // Find matching original file
           const file = files[i];
           if (!file) continue;
           
@@ -712,13 +720,11 @@ const Topics = {
         });
       }
       
-      // Sync permissions
       if (visibility === 'restricted' && DrivePermissions.syncPermissions) {
         const finalAllowed = [DMS.currentUser.email, ...DMS.tempAllowedViewers];
         await DrivePermissions.syncPermissions(topicId, finalAllowed);
       }
 
-      // Update/create tags in tags collection
       for (const tag of this.tempTags) {
         const tagRef = DMS.db.collection('tags').doc(tag.toLowerCase());
         const tagDoc = await tagRef.get();
@@ -733,8 +739,8 @@ const Topics = {
         action: DMS.editingTopicId ? 'update_topic' : 'create_topic',
         topicId: topicId,
         userId: DMS.currentUser.uid,
-        userName: DMS.currentUser.displayName,
-        details: DMS.editingTopicId ? `อัปเดตเอกสาร: ${title}` : `สร้างเอกสาร: ${title}`,
+        userName: DMS.currentUser.displayName || DMS.currentUser.email,
+        details: DMS.editingTopicId ? `อัปเดตเอกสาร: ${title}` : `สร้างและอัปโหลดเอกสาร: ${title}`,
         timestamp: now
       });
 
@@ -779,7 +785,7 @@ const Topics = {
         action: 'delete_topic',
         topicId: topicId,
         userId: DMS.currentUser.uid,
-        userName: DMS.currentUser.displayName,
+        userName: DMS.currentUser.displayName || DMS.currentUser.email,
         details: `ย้ายเอกสาร "${doc.data().title}" ไปถังขยะ`,
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
       });
@@ -796,14 +802,11 @@ const Topics = {
   async loadTrash() {
     try {
       let query = DMS.db.collection('topics').where('isDeleted', '==', true);
-      
-      // Only admin can see all trash, others see only their own
       if (DMS.currentUser.role !== 'admin') {
         query = query.where('createdBy', '==', DMS.currentUser.uid);
       }
       
       const snapshot = await query.get();
-        
       const list = document.getElementById('trashList');
       const empty = document.getElementById('trashEmpty');
       
@@ -865,12 +868,10 @@ const Topics = {
     }
   },
 
-  // ⭐ Permanent delete
   async permanentDeleteTopic(topicId) {
     if (!confirm('⚠️ ลบถาวร? ไม่สามารถกู้คืนได้! ไฟล์บน Google Drive จะถูกลบด้วย')) return;
     
     try {
-      // Delete all files from Drive
       const filesSnap = await DMS.db.collection('topics').doc(topicId).collection('files').get();
       const batch = DMS.db.batch();
       
@@ -883,7 +884,6 @@ const Topics = {
       }
       await batch.commit();
       
-      // Delete topic document
       await DMS.db.collection('topics').doc(topicId).delete();
       
       showToast('ลบถาวรสำเร็จ');
@@ -894,17 +894,14 @@ const Topics = {
     }
   },
 
-  // ⭐ Empty trash
   async emptyTrash() {
     if (!confirm('⚠️ ล้างถังขยะทั้งหมด? ไม่สามารถกู้คืนได้!')) return;
     
     try {
       const snapshot = await DMS.db.collection('topics').where('isDeleted', '==', true).get();
-      
       for (const doc of snapshot.docs) {
         await this.permanentDeleteTopic(doc.id);
       }
-      
       showToast('ล้างถังขยะสำเร็จ');
       this.loadTrash();
     } catch (error) {

@@ -365,10 +365,12 @@
           </div>
         </div>
         
-        <div id="allowedViewersSection" class="form-group hidden glass-box">
-          <label>ระบุอีเมลผู้ที่มีสิทธิ์เข้าถึง</label>
+        <div id="allowedViewersSection" class="form-group hidden">
+          <label class="form-label">เลือกผู้เข้าถึงจากระบบ</label>
           <div class="flex gap-2">
-            <input type="email" id="viewerEmailInput" class="form-input" placeholder="อีเมล...">
+            <select id="viewerEmailSelect" class="form-input">
+              <option value="">-- กำลังโหลดผู้ใช้งาน --</option>
+            </select>
             <button type="button" id="btnAddViewer" class="btn-secondary">เพิ่ม</button>
           </div>
           <div id="viewersList" class="viewers-list mt-2"></div>
@@ -422,7 +424,34 @@
           </div>
           <div class="flex-1">
             <label for="categoryIconInput">ไอคอน (Emoji)</label>
-            <input type="text" id="categoryIconInput" class="form-input" placeholder="📁" maxlength="2">
+            <select id="categoryIconInput" class="form-input">
+              <option value="📁">📁 โฟลเดอร์ (📁)</option>
+              <option value="📂">📂 โฟลเดอร์เปิด (📂)</option>
+              <option value="📄">📄 เอกสาร (📄)</option>
+              <option value="📎">📎 คลิปกระดาษ (📎)</option>
+              <option value="🏷️">🏷️ ป้ายกำกับ (🏷️)</option>
+              <option value="👥">👥 กลุ่มคน (👥)</option>
+              <option value="🗑️">🗑️ ถังขยะ (🗑️)</option>
+              <option value="📊">📊 กราฟ (📊)</option>
+              <option value="💼">💼 กระเป๋า (💼)</option>
+              <option value="📅">📅 ปฏิทิน (📅)</option>
+              <option value="📌">📌 หมุดปัก (📌)</option>
+              <option value="📝">📝 บันทึก (📝)</option>
+              <option value="🔍">🔍 ค้นหา (🔍)</option>
+              <option value="🔑">🔑 กุญแจ (🔑)</option>
+              <option value="📢">📢 ข่าวสาร (📢)</option>
+              <option value="⚙️">⚙️ ตั้งค่า (⚙️)</option>
+              <option value="💾">💾 บันทึก (💾)</option>
+              <option value="✉️">✉️ จดหมาย (✉️)</option>
+              <option value="📙">📙 หนังสือส้ม (📙)</option>
+              <option value="📘">📘 หนังสือฟ้า (📘)</option>
+              <option value="📕">📕 หนังสือแดง (📕)</option>
+              <option value="📗">📗 หนังสือเขียว (📗)</option>
+              <option value="🏢">🏢 สำนักงาน (🏢)</option>
+              <option value="💰">💰 การเงิน (💰)</option>
+              <option value="⚖️">⚖️ กฎหมาย (⚖️)</option>
+              <option value="🎓">🎓 การศึกษา (🎓)</option>
+            </select>
           </div>
         </div>
       </form>

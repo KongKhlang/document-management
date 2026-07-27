@@ -807,6 +807,13 @@ a { text-decoration: none; color: inherit; }
 }
 .btn-danger:hover { background: var(--danger-color); color: white; border-color: transparent; }
 
+.btn-sm {
+  padding: 0.45rem 1rem !important;
+  font-size: 0.8rem !important;
+  font-weight: 500 !important;
+  border-radius: var(--radius-sm) !important;
+}
+
 .btn-icon {
   background: none;
   border: none;
@@ -820,6 +827,30 @@ a { text-decoration: none; color: inherit; }
 }
 .btn-icon:hover { background: var(--bg-secondary); color: var(--text-primary); }
 .btn-icon-danger:hover { background: rgba(239,68,68,0.08); color: var(--danger-color); }
+
+/* Custom select styling override for native selects */
+select.form-select, select.form-input {
+  font-family: 'Prompt', sans-serif;
+  cursor: pointer;
+  border: 1.5px solid var(--card-border);
+  background-color: var(--bg-secondary);
+  border-radius: var(--radius);
+  color: var(--text-primary);
+  outline: none;
+  transition: all var(--transition);
+}
+select.form-select:focus, select.form-input:focus {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08);
+  background-color: var(--bg-card);
+}
+select option {
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+  font-family: 'Prompt', sans-serif;
+  padding: 0.5rem;
+}
+
 
 /* ===== DASHBOARD ===== */
 .stats-grid {
