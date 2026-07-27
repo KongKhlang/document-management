@@ -1539,9 +1539,7 @@ a { text-decoration: none; color: inherit; }
 @keyframes spin { 100% { transform: rotate(360deg); } }
 @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03); } }
 
-/* ===== HIDDEN ON PRODUCTION FOR STABILITY ===== */
-.admin-only { display: none; }
-.editor-action { display: none; }
+/* ===== HIDDEN ON PRODUCTION FOR STABILITY (Controlled via JS class toggles) ===== */
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 1280px) {
