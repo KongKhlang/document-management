@@ -136,34 +136,46 @@ const Dashboard = {
       const listEl = document.getElementById('recentActivityList');
       if(!listEl) return;
       
-      const snapshot = await DMS.db.collection('activityLog')
-        .orderBy('timestamp', 'desc')
-        .limit(10)
+      const snapshot = await DMS.db.collection('topics')
+        .where('isDeleted', '==', false)
+        .orderBy('createdAt', 'desc')
         .get();
         
-      if(snapshot.empty) {
-        listEl.innerHTML = '<div class="text-sm text-slate-400 text-center py-4">ไม่มีกิจกรรมล่าสุด</div>';
+      let uploads = [];
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        if (
+          data.visibility === 'public' ||
+          data.createdBy === DMS.currentUser.uid ||
+          (data.allowedViewers && data.allowedViewers.includes(DMS.currentUser.email)) ||
+          DMS.currentUser.role === 'admin'
+        ) {
+          uploads.push({ id: doc.id, ...data });
+        }
+      });
+      
+      // Top 3 uploads
+      uploads = uploads.slice(0, 3);
+      
+      if(uploads.length === 0) {
+        listEl.innerHTML = '<div class="text-sm text-slate-400 text-center py-4">ไม่มีเอกสารอัปโหลดล่าสุด</div>';
         return;
       }
       
-      let html = '<div class="relative border-l border-slate-700 ml-3 pl-4 space-y-4">';
-      snapshot.forEach(doc => {
-        const log = doc.data();
-        html += `
-          <div class="relative">
-            <div class="absolute -left-6 top-1.5 w-3 h-3 bg-indigo-500 rounded-full border-2 border-slate-900"></div>
-            <div class="text-xs text-slate-400 mb-0.5">${formatDateTime(log.timestamp)}</div>
-            <div class="text-sm text-white">
-              <span class="font-medium text-indigo-400">${escapeHtml(log.userName)}</span>
-              ${escapeHtml(log.details)}
-            </div>
+      listEl.innerHTML = uploads.map(doc => `
+        <li style="display:flex; flex-direction:column; gap:0.25rem; align-items:flex-start; width:100%;">
+          <div style="font-weight:600; color:var(--text-primary); font-size:0.95rem; text-overflow:ellipsis; overflow:hidden; white-space:nowrap; width:100%;">📄 ${escapeHtml(doc.title)}</div>
+          <div style="font-size:0.83rem; color:var(--text-secondary);">
+            👤 ผู้อัปโหลด: <span style="font-weight:500; color:var(--accent-primary);">${escapeHtml(doc.createdByName || doc.createdByEmail || 'ผู้ใช้งาน')}</span>
           </div>
-        `;
-      });
-      html += '</div>';
-      listEl.innerHTML = html;
+          <div style="font-size:0.78rem; color:var(--text-muted);">
+            📅 เมื่อ: ${formatDateTime(doc.createdAt)}
+          </div>
+        </li>
+      `).join('');
     } catch (error) {
-      console.error('Error loading recent activity:', error);
+      console.error('Error loading recent uploads:', error);
+      listEl.innerHTML = '<div class="text-sm text-slate-400 text-center py-4">เกิดข้อผิดพลาดในการโหลดข้อมูล</div>';
     }
   }
 };

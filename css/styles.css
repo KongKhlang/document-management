@@ -257,10 +257,44 @@ a { text-decoration: none; color: inherit; }
   box-shadow: var(--shadow);
 }
 
-.sidebar.collapsed { width: 85px; }
+.sidebar.collapsed { width: 80px; }
 .sidebar.collapsed .sidebar-label,
 .sidebar.collapsed .sidebar-user-info,
 .sidebar.collapsed .sidebar-logo-text { display: none; }
+
+/* Centering elements when collapsed */
+.sidebar.collapsed .sidebar-header {
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1.25rem 0.5rem;
+  justify-content: center;
+  align-items: center;
+}
+.sidebar.collapsed .sidebar-logo {
+  justify-content: center;
+}
+.sidebar.collapsed .sidebar-nav {
+  padding: 1.5rem 0.5rem;
+  align-items: center;
+}
+.sidebar.collapsed .sidebar-nav a {
+  justify-content: center;
+  padding: 0.85rem 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+}
+.sidebar.collapsed .sidebar-nav a .nav-icon {
+  margin: 0;
+  font-size: 1.35rem;
+}
+.sidebar.collapsed .user-profile {
+  justify-content: center;
+  padding: 0.85rem 0.5rem;
+}
+.sidebar.collapsed .user-avatar {
+  margin: 0;
+}
 
 /* Sidebar Header */
 .sidebar-header {
@@ -453,19 +487,24 @@ a { text-decoration: none; color: inherit; }
 
 .settings-dropdown {
   position: absolute;
-  bottom: calc(100% + 10px);
+  top: calc(100% + 10px);
   right: 0;
-  width: 160px;
+  width: 170px;
   background: var(--bg-card);
   border: 1px solid var(--card-border);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius);
   box-shadow: var(--shadow-hover);
-  padding: 0.4rem;
+  padding: 0.5rem;
   z-index: 300;
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-  animation: slideUp 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+  animation: slideDown 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .dropdown-item {

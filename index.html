@@ -113,15 +113,6 @@
               <div id="sidebarUserName">User Name</div>
               <span id="sidebarUserRole" class="role-badge">Viewer</span>
             </div>
-            
-            <!-- Settings Dropdown -->
-            <div class="settings-dropdown-wrapper">
-              <button id="btnSidebarSettings" class="btn-icon-settings" title="ตั้งค่า">⚙️</button>
-              <div id="settingsDropdown" class="settings-dropdown hidden">
-                <button id="btnThemeToggle" class="dropdown-item">🌓 เปลี่ยนธีม</button>
-                <button id="btnLogout" class="dropdown-item text-danger">🚪 ออกจากระบบ</button>
-              </div>
-            </div>
           </div>
         </div>
       </aside>
@@ -137,6 +128,17 @@
               <span class="search-icon">🔍</span>
               <input type="text" id="globalSearchInput" placeholder="ค้นหาเอกสาร..." class="search-input">
             </div>
+            
+            <!-- Settings Dropdown -->
+            <div class="settings-dropdown-wrapper">
+              <button id="btnSidebarSettings" class="notif-btn" title="ตั้งค่า">⚙️</button>
+              <div id="settingsDropdown" class="settings-dropdown hidden">
+                <button id="btnThemeToggle" class="dropdown-item">🌓 เปลี่ยนธีม</button>
+                <button id="btnLogout" class="dropdown-item text-danger">🚪 ออกจากระบบ</button>
+              </div>
+            </div>
+
+            <!-- Notifications -->
             <button id="btnNotifications" class="notif-btn">
               🔔
               <span id="notificationBadge" class="notif-badge hidden">0</span>
@@ -191,7 +193,7 @@
             </div>
             <div class="dashboard-card">
               <div class="dashboard-card-header">
-                <h3>กิจกรรมล่าสุด</h3>
+                <h3>อัปโหลดล่าสุด (3 อันดับแรก)</h3>
               </div>
               <ul id="recentActivityList"></ul>
             </div>
