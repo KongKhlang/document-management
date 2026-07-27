@@ -1,7 +1,7 @@
 const Files = {
   async uploadFile(file, folderId, onProgress) {
     const token = this.getAccessToken();
-    if (!token) throw new Error('ไม่พบ Google Access Token กรุณาเข้าสู่ระบบใหม่');
+    if (!token) throw new Error('ไม่พบ Google Access Token กรุณาล็อกเอาต์แล้วล็อกอินใหม่อีกครั้ง');
 
     const metadata = {
       name: file.name,
@@ -22,7 +22,9 @@ const Files = {
       });
 
       if (!response.ok) {
-        throw new Error(`อัปโหลดล้มเหลว: ${response.statusText}`);
+        const errorText = await response.text();
+        console.error('Google Drive Upload Response Error:', errorText);
+        throw new Error(`Google API Error (${response.status}): ${response.statusText} - ${errorText}`);
       }
 
       if(onProgress) onProgress(100);
@@ -52,7 +54,8 @@ const Files = {
         completed++;
         if (onProgress) onProgress((completed / totalFiles) * 100);
       } catch (error) {
-        showToast(`อัปโหลดไฟล์ ${file.name} ล้มเหลว`, 'error');
+        showToast(`ไฟล์ ${file.name} อัปโหลดล้มเหลว: ${error.message}`, 'error');
+        throw error; // Re-throw to halt the submit process and prevent partial saves
       }
     }
     return results;
