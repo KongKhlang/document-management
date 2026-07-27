@@ -275,8 +275,7 @@
 
         <!-- Categories Page (Admin) -->
         <section id="categoriesPage" class="page hidden admin-only">
-          <div class="page-header flex-between">
-            <h2>จัดการหมวดหมู่</h2>
+          <div class="page-header flex-end" style="justify-content: flex-end;">
             <button id="btnAddCategory" class="btn-primary">+ เพิ่มหมวดหมู่</button>
           </div>
           <div id="categoriesList" class="categories-grid">
@@ -287,8 +286,7 @@
         <!-- Users Page (Admin) -->
         <section id="usersPage" class="page hidden admin-only">
           <div class="page-header flex-between">
-            <h2>จัดการผู้ใช้</h2>
-            <div class="tabs">
+            <div class="tabs" style="margin-left: auto;">
               <button id="tabPending" class="tab-btn active">
                 รอการอนุมัติ <span id="pendingCount" class="badge bg-danger">0</span>
               </button>
@@ -305,8 +303,7 @@
 
         <!-- Trash Page -->
         <section id="trashPage" class="page hidden">
-          <div class="page-header flex-between">
-            <h2>ถังขยะ</h2>
+          <div class="page-header flex-end" style="justify-content: flex-end;">
             <button id="btnEmptyTrash" class="btn-danger admin-only">ล้างถังขยะ</button>
           </div>
           <div id="trashList" class="topics-grid">

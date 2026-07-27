@@ -62,13 +62,13 @@ const Dashboard = {
       let html = categories.filter(c => c.topicCount > 0).map(cat => {
         const percent = ((cat.topicCount || 0) / maxCount) * 100;
         return `
-          <div class="mb-3">
-            <div class="flex justify-between text-xs mb-1">
-              <span class="text-slate-300">${escapeHtml(cat.name)}</span>
-              <span class="text-slate-400">${cat.topicCount || 0}</span>
+          <div style="margin-bottom: 1rem; width: 100%;">
+            <div class="flex" style="justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.35rem;">
+              <span style="font-weight: 500; color: var(--text-primary);">${escapeHtml(cat.name)}</span>
+              <span style="font-weight: 600; color: var(--text-secondary);">${cat.topicCount || 0} หัวข้อ</span>
             </div>
-            <div class="w-full bg-slate-700 rounded-full h-2">
-              <div class="h-2 rounded-full transition-all duration-1000" style="width: ${percent}%; background-color: ${cat.color || '#6366f1'}"></div>
+            <div style="width: 100%; background: var(--bg-secondary); border-radius: 9999px; height: 8px; overflow: hidden;">
+              <div style="height: 8px; border-radius: 9999px; transition: width var(--transition); width: ${percent}%; background-color: ${cat.color || '#6366f1'}"></div>
             </div>
           </div>
         `;
@@ -105,7 +105,6 @@ const Dashboard = {
         }
       });
       
-      // take top 5
       topics = topics.slice(0, 5);
       
       if(topics.length === 0) {
@@ -114,14 +113,14 @@ const Dashboard = {
       }
       
       listEl.innerHTML = topics.map(topic => `
-        <div class="flex items-center justify-between p-3 hover:bg-slate-800/50 rounded-lg cursor-pointer transition-colors border border-transparent hover:border-slate-700/50" onclick="App.showTopicDetail('${topic.id}')">
+        <div class="flex items-center justify-between" style="padding: 0.75rem 1rem; background: var(--bg-card); border-radius: 12px; cursor: pointer; transition: all var(--transition); border: 1px solid var(--card-border); margin-bottom: 0.5rem; box-shadow: var(--shadow-sm);" onclick="App.showTopicDetail('${topic.id}')" onmouseover="this.style.borderColor='var(--accent-primary)'; this.style.transform='translateY(-1px)';" onmouseout="this.style.borderColor='var(--card-border)'; this.style.transform='translateY(0)';">
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-xl">
+            <div style="width: 38px; height: 38px; border-radius: 10px; background-color: var(--bg-secondary); color: var(--accent-primary); display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
               ${topic.visibility === 'restricted' ? '🔒' : '📄'}
             </div>
             <div>
-              <div class="text-sm font-medium text-white truncate max-w-[200px] sm:max-w-xs">${escapeHtml(topic.title)}</div>
-              <div class="text-xs text-slate-400">${formatDate(topic.updatedAt)}</div>
+              <div style="font-size: 0.88rem; font-weight: 600; color: var(--text-primary); max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtml(topic.title)}</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">${formatDate(topic.updatedAt)}</div>
             </div>
           </div>
         </div>
@@ -154,7 +153,6 @@ const Dashboard = {
         }
       });
       
-      // Top 3 uploads
       uploads = uploads.slice(0, 3);
       
       if(uploads.length === 0) {
@@ -163,12 +161,12 @@ const Dashboard = {
       }
       
       listEl.innerHTML = uploads.map(doc => `
-        <li style="display:flex; flex-direction:column; gap:0.25rem; align-items:flex-start; width:100%;">
-          <div style="font-weight:600; color:var(--text-primary); font-size:0.95rem; text-overflow:ellipsis; overflow:hidden; white-space:nowrap; width:100%;">📄 ${escapeHtml(doc.title)}</div>
-          <div style="font-size:0.83rem; color:var(--text-secondary);">
+        <li style="display:flex; flex-direction:column; gap:0.25rem; align-items:flex-start; width:100%; list-style:none; padding: 0.75rem 1rem; background: var(--bg-card); border-radius: 12px; border: 1px solid var(--card-border); margin-bottom: 0.5rem; box-shadow: var(--shadow-sm);">
+          <div style="font-weight:600; color:var(--text-primary); font-size:0.9rem; text-overflow:ellipsis; overflow:hidden; white-space:nowrap; width:100%;">📄 ${escapeHtml(doc.title)}</div>
+          <div style="font-size:0.8rem; color:var(--text-secondary);">
             👤 ผู้อัปโหลด: <span style="font-weight:500; color:var(--accent-primary);">${escapeHtml(doc.createdByName || doc.createdByEmail || 'ผู้ใช้งาน')}</span>
           </div>
-          <div style="font-size:0.78rem; color:var(--text-muted);">
+          <div style="font-size:0.75rem; color:var(--text-muted);">
             📅 เมื่อ: ${formatDateTime(doc.createdAt)}
           </div>
         </li>
