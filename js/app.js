@@ -2,6 +2,7 @@ const App = {
   init() {
     this.setupNavigation();
     this.setupTheme();
+    this.setupSettingsDropdown();
     
     if(Categories.init) Categories.init();
     if(Topics.init) Topics.init();
@@ -13,6 +14,28 @@ const App = {
     }
     
     this.navigateTo('dashboard');
+  },
+  
+  setupSettingsDropdown() {
+    const btn = document.getElementById('btnSidebarSettings');
+    const dropdown = document.getElementById('settingsDropdown');
+    
+    if (btn && dropdown) {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dropdown.classList.toggle('hidden');
+      });
+      
+      // Close dropdown when clicking anywhere else
+      document.addEventListener('click', () => {
+        dropdown.classList.add('hidden');
+      });
+      
+      // Prevent closing when clicking inside the dropdown
+      dropdown.addEventListener('click', (e) => {
+        e.stopPropagation();
+      });
+    }
   },
   
   setupNavigation() {

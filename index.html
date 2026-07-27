@@ -113,10 +113,15 @@
               <div id="sidebarUserName">User Name</div>
               <span id="sidebarUserRole" class="role-badge">Viewer</span>
             </div>
-          </div>
-          <div class="sidebar-footer-actions">
-            <button id="btnThemeToggle" title="Toggle Theme">🌓 Theme</button>
-            <button id="btnLogout" title="Logout">🚪 ออกจากระบบ</button>
+            
+            <!-- Settings Dropdown -->
+            <div class="settings-dropdown-wrapper">
+              <button id="btnSidebarSettings" class="btn-icon-settings" title="ตั้งค่า">⚙️</button>
+              <div id="settingsDropdown" class="settings-dropdown hidden">
+                <button id="btnThemeToggle" class="dropdown-item">🌓 เปลี่ยนธีม</button>
+                <button id="btnLogout" class="dropdown-item text-danger">🚪 ออกจากระบบ</button>
+              </div>
+            </div>
           </div>
         </div>
       </aside>
