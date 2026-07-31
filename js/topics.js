@@ -763,11 +763,25 @@ const Topics = {
   },
   
   async deleteTopic(topicId) {
-    if(!confirm('ยืนยันการย้ายเอกสารนี้ไปที่ถังขยะ?')) return;
+    if(!confirm('ยืนยันการย้ายเอกสารนี้ไปที่ถังขยะ? (ไฟล์แนบบน Google Drive จะถูกย้ายไปถังขยะด้วย)')) return;
     
     try {
       const doc = await DMS.db.collection('topics').doc(topicId).get();
+      if (!doc.exists) return;
       const catId = doc.data().categoryId;
+      
+      // Move attached files on Google Drive to Trash
+      const filesSnap = await DMS.db.collection('topics').doc(topicId).collection('files').get();
+      for (const fDoc of filesSnap.docs) {
+        const f = fDoc.data();
+        if (f.driveFileId) {
+          try {
+            await Files.trashFile(f.driveFileId);
+          } catch (e) {
+            console.warn('Drive file trash failed:', e);
+          }
+        }
+      }
       
       await DMS.db.collection('topics').doc(topicId).update({
         isDeleted: true,
@@ -786,7 +800,7 @@ const Topics = {
         topicId: topicId,
         userId: DMS.currentUser.uid,
         userName: DMS.currentUser.displayName || DMS.currentUser.email,
-        details: `ย้ายเอกสาร "${doc.data().title}" ไปถังขยะ`,
+        details: `ย้ายเอกสาร "${doc.data().title}" และไฟล์แนบไปถังขยะ`,
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
       });
       
@@ -848,6 +862,19 @@ const Topics = {
   
   async restoreTopic(topicId, categoryId) {
     try {
+      // Untrash attached files on Google Drive
+      const filesSnap = await DMS.db.collection('topics').doc(topicId).collection('files').get();
+      for (const fDoc of filesSnap.docs) {
+        const f = fDoc.data();
+        if (f.driveFileId) {
+          try {
+            await Files.untrashFile(f.driveFileId);
+          } catch (e) {
+            console.warn('Drive file untrash failed:', e);
+          }
+        }
+      }
+
       await DMS.db.collection('topics').doc(topicId).update({
         isDeleted: false,
         deletedAt: firebase.firestore.FieldValue.delete(),
@@ -860,7 +887,7 @@ const Topics = {
         }).catch(() => {});
       }
       
-      showToast('กู้คืนเอกสารสำเร็จ');
+      showToast('กู้คืนเอกสารและไฟล์แนบสำเร็จ');
       this.loadTrash();
     } catch (error) {
       console.error('Restore error', error);
@@ -869,7 +896,7 @@ const Topics = {
   },
 
   async permanentDeleteTopic(topicId) {
-    if (!confirm('⚠️ ลบถาวร? ไม่สามารถกู้คืนได้! ไฟล์บน Google Drive จะถูกลบด้วย')) return;
+    if (!confirm('⚠️ ลบถาวร? ไม่สามารถกู้คืนได้! ไฟล์บน Google Drive จะถูกลบถาวร')) return;
     
     try {
       const filesSnap = await DMS.db.collection('topics').doc(topicId).collection('files').get();
@@ -877,9 +904,11 @@ const Topics = {
       
       for (const fDoc of filesSnap.docs) {
         const f = fDoc.data();
-        try {
-          await Files.deleteFile(f.driveFileId);
-        } catch (e) { console.warn('Drive delete failed:', e); }
+        if (f.driveFileId) {
+          try {
+            await Files.deleteFile(f.driveFileId);
+          } catch (e) { console.warn('Drive delete failed:', e); }
+        }
         batch.delete(fDoc.ref);
       }
       await batch.commit();

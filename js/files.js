@@ -78,6 +78,48 @@ const Files = {
       throw error;
     }
   },
+
+  async trashFile(driveFileId) {
+    if (!driveFileId) return;
+    const token = this.getAccessToken();
+    if (!token) return;
+    try {
+      const response = await fetch(`https://www.googleapis.com/drive/v3/files/${driveFileId}`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ trashed: true })
+      });
+      if (!response.ok && response.status !== 404) {
+        console.warn('Trash file response not OK:', await response.text());
+      }
+    } catch (error) {
+      console.error('Trash File Error:', error);
+    }
+  },
+
+  async untrashFile(driveFileId) {
+    if (!driveFileId) return;
+    const token = this.getAccessToken();
+    if (!token) return;
+    try {
+      const response = await fetch(`https://www.googleapis.com/drive/v3/files/${driveFileId}`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ trashed: false })
+      });
+      if (!response.ok && response.status !== 404) {
+        console.warn('Untrash file response not OK:', await response.text());
+      }
+    } catch (error) {
+      console.error('Untrash File Error:', error);
+    }
+  },
   
   async downloadFile(driveFileId, fileName) {
     try {
