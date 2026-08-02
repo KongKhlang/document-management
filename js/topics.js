@@ -286,7 +286,7 @@ const Topics = {
       
       if(visEl) {
         visEl.innerHTML = topic.visibility === 'private' 
-          ? '🔐 ส่วนตัว (เฉพาะฉันและแอดมิน)' 
+          ? '🔐 ส่วนตัว' 
           : (topic.visibility === 'restricted' ? '👥 เฉพาะคนที่เลือก' : '🌐 ทุกคนในระบบ');
       }
 
