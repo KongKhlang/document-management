@@ -1,5 +1,10 @@
 const Auth = {
+  idleTimeoutTimer: null,
+  IDLE_TIMEOUT_MS: 30 * 60 * 1000, // 30 นาที
+
   init() {
+    this.setupInactivityListener();
+
     DMS.auth.onAuthStateChanged(async (user) => {
       if (user) {
         await this.handleSignedIn(user);
@@ -19,6 +24,29 @@ const Auth = {
     bindClick('btnLogout', () => this.signOut());
   },
 
+  setupInactivityListener() {
+    const resetTimer = () => {
+      if (this.idleTimeoutTimer) clearTimeout(this.idleTimeoutTimer);
+      if (DMS.currentUser) {
+        this.idleTimeoutTimer = setTimeout(() => {
+          this.handleInactivityLogout();
+        }, this.IDLE_TIMEOUT_MS);
+      }
+    };
+
+    ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll'].forEach(evt => {
+      window.addEventListener(evt, resetTimer, { passive: true });
+    });
+
+    resetTimer();
+  },
+
+  handleInactivityLogout() {
+    if (!DMS.currentUser) return;
+    showToast('ระบบทำการล็อกเอาต์อัตโนมัติเนื่องจากไม่มีการใช้งานเกิน 30 นาที', 'warning');
+    this.signOut();
+  },
+
   async signIn() {
     const provider = new firebase.auth.GoogleAuthProvider();
     provider.addScope(DRIVE_SCOPES);
@@ -34,27 +62,23 @@ const Auth = {
     }
   },
 
-  async refreshGoogleToken(interactive = true) {
+  async refreshGoogleToken() {
     try {
-      const currentUser = DMS.auth.currentUser;
-      if (!currentUser) return null;
-
       const provider = new firebase.auth.GoogleAuthProvider();
       provider.addScope(DRIVE_SCOPES);
 
-      if (interactive) {
-        const result = await currentUser.reauthenticateWithPopup(provider);
-        if (result && result.credential && result.credential.accessToken) {
-          const token = result.credential.accessToken;
-          DMS.googleAccessToken = token;
-          localStorage.setItem('googleAccessToken', token);
-          localStorage.setItem('googleAccessTokenTime', Date.now().toString());
-          showToast('อัปเดตสิทธิ์ Google Drive เรียบร้อยแล้ว', 'success');
-          return token;
-        }
+      const result = await DMS.auth.signInWithPopup(provider);
+      if (result && result.credential && result.credential.accessToken) {
+        const token = result.credential.accessToken;
+        DMS.googleAccessToken = token;
+        localStorage.setItem('googleAccessToken', token);
+        localStorage.setItem('googleAccessTokenTime', Date.now().toString());
+        showToast('เชื่อมต่อสิทธิ์ Google Drive สำเร็จ', 'success');
+        return token;
       }
     } catch (err) {
       console.warn('Google Access Token refresh error:', err);
+      showToast('กรุณายืนยันสิทธิ์ Google Drive เพื่ออัปโหลด/ดาวน์โหลดไฟล์', 'warning');
     }
     return null;
   },
@@ -63,11 +87,11 @@ const Auth = {
     let token = DMS.googleAccessToken || localStorage.getItem('googleAccessToken');
     const tokenTimeStr = localStorage.getItem('googleAccessTokenTime');
     const tokenTime = tokenTimeStr ? parseInt(tokenTimeStr, 10) : 0;
-    const isExpired = !tokenTime || (Date.now() - tokenTime > 50 * 60 * 1000); // Expire after 50 minutes
+    const isExpired = !tokenTime || (Date.now() - tokenTime > 50 * 60 * 1000); // 50 นาที
 
     if (!token || isExpired) {
-      console.log('Google Access Token is missing or expired. Refreshing token...');
-      token = await this.refreshGoogleToken(true);
+      console.log('Google Access Token is missing or expired. Prompting token refresh...');
+      token = await this.refreshGoogleToken();
     }
 
     return token;
@@ -112,6 +136,7 @@ const Auth = {
         case 'approved':
           DMS.currentUser = { uid: user.uid, ...userData };
           this.showMainApp();
+          this.setupInactivityListener();
           break;
       }
     } catch (error) {
@@ -170,8 +195,11 @@ const Auth = {
   },
   
   signOut() { 
+    if (this.idleTimeoutTimer) clearTimeout(this.idleTimeoutTimer);
     DMS.auth.signOut(); 
     DMS.currentUser = null;
     DMS.googleAccessToken = null;
+    localStorage.removeItem('googleAccessToken');
+    localStorage.removeItem('googleAccessTokenTime');
   }
 };
