@@ -96,6 +96,23 @@ const Users = {
       const select = document.getElementById(`role-select-${uid}`);
       const role = select ? select.value : 'viewer';
       
+      const userDoc = await DMS.db.collection('users').doc(uid).get();
+      if (!userDoc.exists) throw new Error('ไม่พบข้อมูลผู้ใช้');
+      const userEmail = userDoc.data().email;
+
+      // Automatically add permission to the Google Drive shared folder
+      if (typeof DRIVE_FOLDER_ID !== 'undefined' && DRIVE_FOLDER_ID) {
+        showToast('กำลังให้สิทธิ์เข้าถึง Google Drive...', 'info');
+        try {
+          // Give them 'writer' (Editor) permission so they can upload/delete files inside the folder!
+          await DrivePermissions.addPermission(DRIVE_FOLDER_ID, userEmail, 'writer');
+          showToast('เพิ่มสิทธิ์ Google Drive สำเร็จ');
+        } catch (e) {
+          console.warn('Failed to share Google Drive folder with user:', e);
+          showToast('แชร์โฟลเดอร์ Google Drive ไม่สำเร็จ กรุณาตรวจสอบสิทธิ์', 'warning');
+        }
+      }
+
       await DMS.db.collection('users').doc(uid).update({
         status: 'approved',
         role: role,
@@ -107,7 +124,7 @@ const Users = {
         action: 'approve_user',
         userId: DMS.currentUser.uid,
         userName: DMS.currentUser.displayName,
-        details: `Approved user ${uid} as ${role}`,
+        details: `Approved user ${uid} (${userEmail}) as ${role}`,
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
       });
       
@@ -150,6 +167,20 @@ const Users = {
   async suspendUser(uid) {
     if(!confirm('ยืนยันการระงับผู้ใช้นี้?')) return;
     try {
+      const userDoc = await DMS.db.collection('users').doc(uid).get();
+      if (userDoc.exists) {
+        const userEmail = userDoc.data().email;
+        if (typeof DRIVE_FOLDER_ID !== 'undefined' && DRIVE_FOLDER_ID) {
+          showToast('กำลังยกเลิกสิทธิ์เข้าถึง Google Drive...', 'info');
+          try {
+            await DrivePermissions.removePermission(DRIVE_FOLDER_ID, userEmail);
+            showToast('ยกเลิกสิทธิ์ Google Drive สำเร็จ');
+          } catch (e) {
+            console.warn('Failed to remove Google Drive permission:', e);
+          }
+        }
+      }
+
       await DMS.db.collection('users').doc(uid).update({ status: 'suspended' });
       showToast('ระงับผู้ใช้สำเร็จ');
       this.loadAllUsers();
@@ -161,6 +192,20 @@ const Users = {
 
   async unsuspendUser(uid) {
     try {
+      const userDoc = await DMS.db.collection('users').doc(uid).get();
+      if (userDoc.exists) {
+        const userEmail = userDoc.data().email;
+        if (typeof DRIVE_FOLDER_ID !== 'undefined' && DRIVE_FOLDER_ID) {
+          showToast('กำลังคืนสิทธิ์เข้าถึง Google Drive...', 'info');
+          try {
+            await DrivePermissions.addPermission(DRIVE_FOLDER_ID, userEmail, 'writer');
+            showToast('คืนสิทธิ์ Google Drive สำเร็จ');
+          } catch (e) {
+            console.warn('Failed to add Google Drive permission:', e);
+          }
+        }
+      }
+
       await DMS.db.collection('users').doc(uid).update({ status: 'approved' });
       showToast('ยกเลิกระงับสำเร็จ');
       this.loadAllUsers();
