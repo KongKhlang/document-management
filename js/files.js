@@ -160,7 +160,16 @@ const Files = {
     }
   },
   
-  async downloadFile(driveFileId, fileName) {
+  async downloadFile(driveFileId, fileName, buttonEl) {
+    let originalHTML = '';
+    if (buttonEl) {
+      originalHTML = buttonEl.innerHTML;
+      buttonEl.innerHTML = '<span class="spinner-inline" style="width: 14px; height: 14px; border-width: 2px;"></span>';
+      buttonEl.style.pointerEvents = 'none';
+      buttonEl.disabled = true;
+    }
+    showToast('กำลังเตรียมดาวน์โหลดไฟล์...', 'info');
+    
     try {
       const response = await this.fetchWithAuth(`https://www.googleapis.com/drive/v3/files/${driveFileId}?alt=media`);
       
@@ -175,9 +184,16 @@ const Files = {
       a.click();
       a.remove();
       window.URL.revokeObjectURL(url);
+      showToast('ดาวน์โหลดไฟล์สำเร็จ');
     } catch (error) {
       console.error('Download Error:', error);
       showToast('เกิดข้อผิดพลาดในการดาวน์โหลด', 'error');
+    } finally {
+      if (buttonEl) {
+        buttonEl.innerHTML = originalHTML;
+        buttonEl.style.pointerEvents = 'auto';
+        buttonEl.disabled = false;
+      }
     }
   },
   
