@@ -271,7 +271,7 @@ const Topics = {
       const tagsEl = document.getElementById('topicDetailTags');
       
       if(titleEl) titleEl.textContent = topic.title;
-      if(descEl) descEl.textContent = topic.description || '-';
+      if(descEl) descEl.textContent = topic.description || '';
       if(dateEl) dateEl.textContent = formatDateTime(topic.updatedAt);
       if(creatorEl) creatorEl.textContent = topic.createdByName || topic.createdByEmail || 'ผู้ใช้ระบบ';
       
@@ -291,7 +291,7 @@ const Topics = {
       }
 
       if(tagsEl) {
-        tagsEl.innerHTML = (topic.tags || []).map(t => `<span class="tag">${escapeHtml(t)}</span>`).join('') || '<span class="text-secondary">-</span>';
+        tagsEl.innerHTML = (topic.tags || []).map(t => `<span class="tag">${escapeHtml(t)}</span>`).join('');
       }
       
       if(fileCountEl) fileCountEl.textContent = `${topic.fileCount || 0} ไฟล์ (${formatFileSize(topic.totalSize || 0)})`;
