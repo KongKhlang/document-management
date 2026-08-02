@@ -15,7 +15,6 @@ const Topics = {
     bindClick('btnSubmitTopic', () => this.handleTopicSubmit());
     bindClick('btnCloseTopicModal', () => hideModal('topicModal'));
     bindClick('btnBackToTopics', () => App.navigateTo('topics'));
-    bindClick('btnShareTopic', () => this.openShareModal());
     bindClick('btnUploadMore', () => this.handleUploadMore());
     bindClick('btnEmptyTrash', () => this.emptyTrash());
     bindClick('btnSaveShare', () => this.saveSharePermissions());
@@ -301,12 +300,10 @@ const Topics = {
       
       const btnEdit = document.getElementById('btnEditTopic');
       const btnDelete = document.getElementById('btnDeleteTopic');
-      const btnShare = document.getElementById('btnShareTopic');
       const btnUploadMore = document.getElementById('btnUploadMore');
       
       if(btnEdit) btnEdit.classList.toggle('hidden', !isEditor);
       if(btnDelete) btnDelete.classList.toggle('hidden', !isEditor);
-      if(btnShare) btnShare.classList.toggle('hidden', !isEditor);
       if(btnUploadMore) btnUploadMore.classList.toggle('hidden', !isEditor);
 
       if(btnEdit) btnEdit.onclick = () => this.showTopicModal(topic);
