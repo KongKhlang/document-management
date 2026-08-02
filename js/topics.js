@@ -31,10 +31,14 @@ const Topics = {
 
     Files.setupDropZone('topicDropZone', 'topicFileInput', 'topicFilePreview');
 
+    const radioPrivate = document.getElementById('visibilityPrivate');
     const radioPublic = document.getElementById('visibilityPublic');
     const radioRestricted = document.getElementById('visibilityRestricted');
     const allowedSection = document.getElementById('allowedViewersSection');
 
+    if(radioPrivate) radioPrivate.addEventListener('change', () => {
+      if(radioPrivate.checked) allowedSection.classList.add('hidden');
+    });
     if(radioPublic) radioPublic.addEventListener('change', () => {
       if(radioPublic.checked) allowedSection.classList.add('hidden');
     });
@@ -195,8 +199,8 @@ const Topics = {
             <span class="category-badge" style="background-color: ${catColor}20; color: ${catColor}; border-color: ${catColor}40">
               ${escapeHtml(catName)}
             </span>
-            <span class="visibility-icon">
-              ${topic.visibility === 'restricted' ? '🔒' : '🌐'}
+            <span class="visibility-icon" title="${topic.visibility === 'private' ? 'ส่วนตัว' : (topic.visibility === 'restricted' ? 'เฉพาะคนที่เลือก' : 'ทุกคนในระบบ')}">
+              ${topic.visibility === 'private' ? '🔐' : (topic.visibility === 'restricted' ? '👥' : '🌐')}
             </span>
           </div>
           <h3 class="topic-card-title">${title}</h3>
@@ -214,7 +218,7 @@ const Topics = {
       return `
         <div class="topic-list-item" onclick="App.showTopicDetail('${topic.id}')">
           <div class="topic-list-icon">
-            ${topic.visibility === 'restricted' ? '🔒' : '📄'}
+            ${topic.visibility === 'private' ? '🔐' : (topic.visibility === 'restricted' ? '👥' : '📄')}
           </div>
           <div class="topic-list-info">
             <h3 class="topic-list-title">${title}</h3>
@@ -243,6 +247,19 @@ const Topics = {
       }
       
       const topic = { id: doc.id, ...doc.data() };
+      
+      // Access Control Verification
+      const isOwner = topic.createdBy === DMS.currentUser.uid;
+      const isAdmin = DMS.currentUser.role === 'admin';
+      const isAllowedViewer = topic.visibility === 'restricted' && topic.allowedViewers && topic.allowedViewers.includes(DMS.currentUser.email);
+      const isPublic = topic.visibility === 'public';
+
+      if (!isOwner && !isAdmin && !isAllowedViewer && !isPublic) {
+        showToast('คุณไม่มีสิทธิ์เข้าถึงเอกสารส่วนตัวนี้', 'error');
+        App.navigateTo('topics');
+        return;
+      }
+
       DMS.currentTopicData = topic;
       
       const titleEl = document.getElementById('topicDetailTitle');
@@ -269,7 +286,9 @@ const Topics = {
       }
       
       if(visEl) {
-        visEl.innerHTML = topic.visibility === 'restricted' ? '🔒 จำกัดสิทธิ์' : '🌐 สาธารณะ';
+        visEl.innerHTML = topic.visibility === 'private' 
+          ? '🔐 ส่วนตัว (เฉพาะฉันและแอดมิน)' 
+          : (topic.visibility === 'restricted' ? '👥 เฉพาะคนที่เลือก' : '🌐 ทุกคนในระบบ');
       }
 
       if(tagsEl) {
@@ -556,13 +575,24 @@ const Topics = {
       this.tempTags = [...(topic.tags || [])];
       
       if (topic.visibility === 'restricted') {
-        document.getElementById('visibilityRestricted').checked = true;
+        const rRestricted = document.getElementById('visibilityRestricted');
+        if (rRestricted) rRestricted.checked = true;
         document.getElementById('allowedViewersSection').classList.remove('hidden');
         DMS.tempAllowedViewers = [...(topic.allowedViewers || [])];
+      } else if (topic.visibility === 'public') {
+        const rPublic = document.getElementById('visibilityPublic');
+        if (rPublic) rPublic.checked = true;
+        document.getElementById('allowedViewersSection').classList.add('hidden');
       } else {
-        document.getElementById('visibilityPublic').checked = true;
+        const rPrivate = document.getElementById('visibilityPrivate');
+        if (rPrivate) rPrivate.checked = true;
         document.getElementById('allowedViewersSection').classList.add('hidden');
       }
+    } else {
+      // Default new topic to Private
+      const rPrivate = document.getElementById('visibilityPrivate');
+      if (rPrivate) rPrivate.checked = true;
+      document.getElementById('allowedViewersSection').classList.add('hidden');
     }
     
     this.renderTagsList();
@@ -618,7 +648,18 @@ const Topics = {
     const title = document.getElementById('topicTitleInput').value.trim();
     const description = document.getElementById('topicDescInput').value.trim();
     const categoryId = document.getElementById('topicCategorySelect').value;
-    const visibility = document.getElementById('visibilityPublic').checked ? 'public' : 'restricted';
+    
+    let visibility = 'private';
+    const rPublic = document.getElementById('visibilityPublic');
+    const rRestricted = document.getElementById('visibilityRestricted');
+    
+    if (rPublic && rPublic.checked) {
+      visibility = 'public';
+    } else if (rRestricted && rRestricted.checked) {
+      visibility = 'restricted';
+    } else {
+      visibility = 'private';
+    }
     
     if (!title || !categoryId) {
       showToast('กรุณากรอกชื่อและเลือกหมวดหมู่', 'warning');

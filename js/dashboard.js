@@ -116,7 +116,7 @@ const Dashboard = {
         <div class="flex items-center justify-between" style="padding: 0.75rem 1rem; background: var(--bg-card); border-radius: 12px; cursor: pointer; transition: all var(--transition); border: 1px solid var(--card-border); margin-bottom: 0.5rem; box-shadow: var(--shadow-sm);" onclick="App.showTopicDetail('${topic.id}')" onmouseover="this.style.borderColor='var(--accent-primary)'; this.style.transform='translateY(-1px)';" onmouseout="this.style.borderColor='var(--card-border)'; this.style.transform='translateY(0)';">
           <div class="flex items-center gap-3">
             <div style="width: 38px; height: 38px; border-radius: 10px; background-color: var(--bg-secondary); color: var(--accent-primary); display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
-              ${topic.visibility === 'restricted' ? '🔒' : '📄'}
+              ${topic.visibility === 'private' ? '🔐' : (topic.visibility === 'restricted' ? '👥' : '📄')}
             </div>
             <div>
               <div style="font-size: 0.88rem; font-weight: 600; color: var(--text-primary); max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtml(topic.title)}</div>
