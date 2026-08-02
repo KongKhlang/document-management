@@ -1,582 +1,523 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LearnSphere — Playful Gamified Educational Platform</title>
+  <title>ระบบคลังเอกสาร</title>
   
-  <!-- SEO Meta Tags -->
-  <meta name="description" content="Master coding, 3D art, math, and space science through fun gamified quests. Claymorphism cards, progress tracking, and interactive quizzes for kids and young leaders.">
-  <meta name="keywords" content="educational platform, coding for kids, claymorphism, gamified learning, online courses, progress tracking">
-  
-  <!-- Favicon -->
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎓</text></svg>">
-
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   
-  <!-- Claymorphism CSS -->
-  <link rel="stylesheet" href="css/styles.css?v=2.0.0">
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/styles.css?v=1.0.2">
+  
+  <!-- Firebase SDK (v10 modular via CDN compat) -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  
+  <!-- Google API & Identity Services -->
+  <script src="https://apis.google.com/js/api.js"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
-
-  <!-- Floating Ambient Blobs -->
-  <div class="bg-blob bg-blob-1"></div>
-  <div class="bg-blob bg-blob-2"></div>
-  <div class="bg-blob bg-blob-3"></div>
-
-  <!-- NAVIGATION BAR -->
-  <header class="navbar">
-    <div class="container">
-      <nav class="nav-container">
-        <a href="#" class="nav-brand">
-          <div class="brand-icon">🎓</div>
-          <span>LearnSphere</span>
-        </a>
-
-        <ul class="nav-links" id="navLinks">
-          <li><a href="#hero" class="nav-link active">Home</a></li>
-          <li><a href="#courses" class="nav-link">Courses</a></li>
-          <li><a href="#progress" class="nav-link">Progress Demo</a></li>
-          <li><a href="#testimonials" class="nav-link">Reviews</a></li>
-          <li><a href="#pricing" class="nav-link">Pricing</a></li>
-          <li><a href="#faq" class="nav-link">FAQ</a></li>
-        </ul>
-
-        <div class="nav-right">
-          <div class="streak-badge">
-            <span>🔥</span>
-            <span>7 Day Streak</span>
-          </div>
-          <button class="btn-clay btn-clay-secondary" onclick="openEnrollModal('Free Trial')">Log In</button>
-          <button class="btn-clay btn-clay-primary" onclick="openEnrollModal('Super Scholar')">Get Started Free</button>
-          <button class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Toggle navigation">☰</button>
+  <div id="app">
+    <!-- 1. Login Page -->
+    <div id="loginPage" class="auth-page">
+      <div class="auth-card">
+        <div class="auth-header">
+          <div class="app-logo">📑</div>
+          <h1>ระบบคลังเอกสาร</h1>
+          <h2>Document Management System</h2>
+          <p>เข้าสู่ระบบเพื่อจัดการและจัดเก็บเอกสารอย่างปลอดภัย</p>
         </div>
-      </nav>
-    </div>
-  </header>
-
-  <!-- HERO SECTION -->
-  <section class="hero-section" id="hero">
-    <div class="container">
-      <div class="hero-grid">
-        <div class="hero-content">
-          <div class="hero-tag">
-            <span>🌟</span>
-            <span>#1 Gamified Learning Platform for Young Leaders</span>
-          </div>
-
-          <h1 class="hero-title">
-            Learning is a Game.<br>
-            <span class="highlight-orange">Master Skills</span> that<br>
-            <span class="highlight-purple">Shape the Future!</span>
-          </h1>
-
-          <p class="hero-desc">
-            Transform screen time into real-world powers! Learn Python coding, 3D digital art, math marvels, and space science through quests, live XP rewards, and interactive challenges.
-          </p>
-
-          <div class="hero-actions">
-            <button class="btn-clay btn-clay-primary" onclick="openEnrollModal('General Enrollment')">
-              <span>🚀 Start Free 14-Day Quest</span>
-            </button>
-            <button class="btn-clay btn-clay-secondary" onclick="document.getElementById('progress').scrollIntoView({behavior: 'smooth'})">
-              <span>🎮 Try Progress Demo</span>
-            </button>
-          </div>
-
-          <div class="hero-stats">
-            <div class="stat-item">
-              <span class="stat-number">150K+</span>
-              <span class="stat-label">Active Learners</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-number">280+</span>
-              <span class="stat-label">Fun Courses</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-number">4.9 ★</span>
-              <span class="stat-label">Parent Rating</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="hero-showcase">
-          <!-- Floating Clay Badges -->
-          <div class="floating-badge floating-badge-1">
-            <div class="badge-icon-box" style="background: var(--color-accent-green);">⚡</div>
-            <div>
-              <div class="badge-info-title">Interactive Quizzes</div>
-              <div class="badge-info-sub">+100 XP per quest</div>
-            </div>
-          </div>
-
-          <div class="floating-badge floating-badge-2">
-            <div class="badge-icon-box" style="background: var(--color-accent-orange);">🏆</div>
-            <div>
-              <div class="badge-info-title">98% Completion Rate</div>
-              <div class="badge-info-sub">Kids love coming back!</div>
-            </div>
-          </div>
-
-          <!-- Main Hero Clay Card -->
-          <div class="clay-card-hero">
-            <div class="hero-illustration-box">
-              <div class="hero-avatar-group">
-                <div class="hero-avatar">🦊</div>
-              </div>
-              <div style="font-family: 'Fredoka', sans-serif; font-size: 1.5rem; font-weight: 700; color: var(--color-primary); margin-bottom: 0.25rem;">
-                Level 14 Coder
-              </div>
-              <div style="font-weight: 800; font-size: 0.95rem; color: var(--color-accent-orange); background: #FFF; padding: 0.35rem 1rem; border-radius: 999px; border: var(--border-clay);">
-                🛡️ Master of Python Loops
-              </div>
-            </div>
-
-            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
-              <div style="flex: 1; background: #F8FAFC; padding: 1rem; border-radius: 20px; border: 2px solid #E2E8F0; text-align: center;">
-                <div style="font-size: 1.5rem;">🔥 7 Days</div>
-                <div style="font-size: 0.8rem; font-weight: 800; color: var(--text-muted);">CURRENT STREAK</div>
-              </div>
-              <div style="flex: 1; background: #F8FAFC; padding: 1rem; border-radius: 20px; border: 2px solid #E2E8F0; text-align: center;">
-                <div style="font-size: 1.5rem; color: var(--color-primary);">💎 850 XP</div>
-                <div style="font-size: 0.8rem; font-weight: 800; color: var(--text-muted);">TOTAL EARNED</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- COURSE CATALOG SECTION -->
-  <section class="catalog-section" id="courses">
-    <div class="container">
-      <div class="section-header">
-        <span class="section-subtitle">EXPLORE CATALOG PREVIEW</span>
-        <h2 class="section-title">Discover Quests You'll Love</h2>
-        <p class="section-desc">From beginner coding to 3D sculpting and astronomy, choose your adventure and earn certificates!</p>
-      </div>
-
-      <!-- Controls & Search -->
-      <div class="catalog-controls">
-        <div class="filter-pills">
-          <button class="pill-tab active" data-category="all">All Quests</button>
-          <button class="pill-tab" data-category="coding">💻 Coding & AI</button>
-          <button class="pill-tab" data-category="creative">🎨 Creative Arts</button>
-          <button class="pill-tab" data-category="math">🧮 Math & Logic</button>
-          <button class="pill-tab" data-category="science">🔬 Science & Space</button>
-        </div>
-
-        <div class="search-box">
-          <span class="search-icon">🔍</span>
-          <input type="text" class="search-input" id="courseSearchInput" placeholder="Search courses or topics...">
-        </div>
-      </div>
-
-      <!-- Courses Grid -->
-      <div class="courses-grid" id="coursesGrid">
-        <!-- Rendered via JS -->
-      </div>
-    </div>
-  </section>
-
-  <!-- PROGRESS TRACKING DEMO SECTION -->
-  <section class="progress-section" id="progress">
-    <div class="container">
-      <div class="section-header">
-        <span class="section-subtitle">INTERACTIVE DEMO</span>
-        <h2 class="section-title">Gamified Progress Tracking</h2>
-        <p class="section-desc">Watch skills level up in real time! Students unlock badges, maintain daily streaks, and visualize their growth.</p>
-      </div>
-
-      <div class="progress-dashboard-wrapper">
-        <div class="progress-grid">
-          <!-- Student Profile & XP Card -->
-          <div class="student-profile-card">
-            <div class="big-avatar-box">
-              <span>🦊</span>
-              <span class="level-tag" id="levelTag">Level 14</span>
-            </div>
-            <h3 class="student-name">Leo Martinez</h3>
-            <p class="student-title">Junior Python Coder & 3D Artist</p>
-
-            <div class="xp-container">
-              <div class="xp-header">
-                <span>XP Progress</span>
-                <span id="xpCurrentText">850 / 1000 XP</span>
-              </div>
-              <div class="xp-bar-bg">
-                <div class="xp-bar-fill" id="xpBarFill" style="width: 85%;"></div>
-              </div>
-            </div>
-
-            <button class="btn-clay btn-clay-green btn-add-xp" id="addXpBtn">
-              <span>⚡ Click to Gain +100 XP Demo!</span>
-            </button>
-
-            <!-- Badges Unlocked -->
-            <div class="badges-container">
-              <div class="badges-title">Unlocked Skill Badges (4)</div>
-              <div class="badges-grid">
-                <div class="badge-item" title="Completed Python Quest">
-                  <span class="badge-emoji">🛡️</span>
-                  <span class="badge-label">Python</span>
-                </div>
-                <div class="badge-item" title="Created 3D Character">
-                  <span class="badge-emoji">🎨</span>
-                  <span class="badge-label">3D Artist</span>
-                </div>
-                <div class="badge-item" title="7 Day Study Streak">
-                  <span class="badge-emoji">🔥</span>
-                  <span class="badge-label">Streak x7</span>
-                </div>
-                <div class="badge-item" title="Solves 50 Math Puzzles">
-                  <span class="badge-emoji">🧩</span>
-                  <span class="badge-label">Math Wiz</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Weekly Study Analytics Chart -->
-          <div class="chart-card">
-            <div class="chart-header">
-              <div>
-                <h3 class="chart-title">Weekly Study Time</h3>
-                <p style="font-size: 0.9rem; font-weight: 700; color: var(--text-muted);">Total: 570 Minutes this week!</p>
-              </div>
-              <span style="background: #ECFDF5; color: var(--color-accent-green); font-weight: 800; font-size: 0.85rem; padding: 0.35rem 0.85rem; border-radius: 999px;">
-                📈 +24% vs Last Week
-              </span>
-            </div>
-
-            <div class="chart-bars-wrapper">
-              <div class="bar-col">
-                <div class="bar-pill" style="height: 45%;" data-mins="45"></div>
-                <span class="bar-label">Mon</span>
-              </div>
-              <div class="bar-col">
-                <div class="bar-pill" style="height: 60%;" data-mins="60"></div>
-                <span class="bar-label">Tue</span>
-              </div>
-              <div class="bar-col">
-                <div class="bar-pill" style="height: 90%; background: linear-gradient(180deg, var(--color-accent-orange), #FF8C53);" data-mins="90"></div>
-                <span class="bar-label">Wed</span>
-              </div>
-              <div class="bar-col">
-                <div class="bar-pill" style="height: 40%;" data-mins="40"></div>
-                <span class="bar-label">Thu</span>
-              </div>
-              <div class="bar-col">
-                <div class="bar-pill" style="height: 75%;" data-mins="75"></div>
-                <span class="bar-label">Fri</span>
-              </div>
-              <div class="bar-col">
-                <div class="bar-pill" style="height: 100%; background: linear-gradient(180deg, var(--color-accent-green), #20E3B2);" data-mins="120"></div>
-                <span class="bar-label">Sat</span>
-              </div>
-              <div class="bar-col">
-                <div class="bar-pill" style="height: 85%;" data-mins="90"></div>
-                <span class="bar-label">Sun</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- STUDENT & PARENT TESTIMONIALS SECTION -->
-  <section class="testimonials-section" id="testimonials">
-    <div class="container">
-      <div class="section-header">
-        <span class="section-subtitle">LOVED BY KIDS & PARENTS</span>
-        <h2 class="section-title">What Our Adventurers Say</h2>
-        <p class="section-desc">See how LearnSphere turns learning into a joyful daily habit for families around the world.</p>
-      </div>
-
-      <div class="testimonials-grid">
-        <div class="clay-testimonial-card">
-          <div class="quote-stars">★★★★★</div>
-          <p class="quote-text">
-            "I used to hate math homework, but LearnSphere turned it into an RPG battle game! I reached Level 14 in 2 weeks and built my first game!"
-          </p>
-          <div class="quote-author">
-            <div class="author-avatar">👦</div>
-            <div>
-              <div class="author-name">Lucas Vance (Age 11)</div>
-              <div class="author-role">Verified Student • Python Quest</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="clay-testimonial-card">
-          <div class="quote-stars">★★★★★</div>
-          <p class="quote-text">
-            "The real-time progress tracking dashboard gives me peace of mind. My daughter is learning Blender 3D art on her own initiative now!"
-          </p>
-          <div class="quote-author">
-            <div class="author-avatar">👩‍⚕️</div>
-            <div>
-              <div class="author-name">Dr. Emily Vance</div>
-              <div class="author-role">Parent of 2 • San Francisco, CA</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="clay-testimonial-card">
-          <div class="quote-stars">★★★★★</div>
-          <p class="quote-text">
-            "The clay badges and weekly XP charts keep my students engaged like no other platform. Highly recommended for STEM classrooms!"
-          </p>
-          <div class="quote-author">
-            <div class="author-avatar">👨‍🏫</div>
-            <div>
-              <div class="author-name">Marcus Sterling</div>
-              <div class="author-role">STEM Educator & Mentor</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ENROLLMENT CTA & PRICING SECTION -->
-  <section class="enroll-section" id="pricing">
-    <div class="container">
-      <!-- Clay Banner CTA -->
-      <div class="clay-banner-cta">
-        <h2 class="banner-title">Start Your 14-Day Free Quest Today!</h2>
-        <p class="banner-subtitle">
-          Join 150,000+ happy students learning coding, art, math, and science. Unlimited access to all courses, no credit card required to try!
-        </p>
-
-        <div class="countdown-box">
-          <div class="timer-item">
-            <span class="timer-val" id="timerHours">04</span>
-            <span class="timer-lbl">Hours</span>
-          </div>
-          <span class="timer-colon">:</span>
-          <div class="timer-item">
-            <span class="timer-val" id="timerMins">32</span>
-            <span class="timer-lbl">Minutes</span>
-          </div>
-          <span class="timer-colon">:</span>
-          <div class="timer-item">
-            <span class="timer-val" id="timerSecs">18</span>
-            <span class="timer-lbl">Seconds</span>
-          </div>
-        </div>
-
-        <div>
-          <button class="btn-clay btn-clay-primary" style="padding: 1rem 2.5rem; font-size: 1.15rem;" onclick="openEnrollModal('Fall 2026 Special Offer')">
-            🎁 Claim 14 Days Free + 30% Off
-          </button>
-        </div>
-      </div>
-
-      <!-- Pricing Plans -->
-      <div class="pricing-grid">
-        <!-- Plan 1 -->
-        <div class="clay-pricing-card">
-          <h3 class="plan-name">Starter Explorer</h3>
-          <p class="plan-desc">Perfect for testing the waters and exploring basic quests.</p>
-          <div class="plan-price-box">
-            <span class="plan-price">$0</span>
-            <span class="plan-period">/ 14 days</span>
-          </div>
-          <ul class="plan-features">
-            <li class="plan-feature-item"><span class="feature-check">✓</span> 10 Beginner Courses</li>
-            <li class="plan-feature-item"><span class="feature-check">✓</span> Basic XP & Progress Tracking</li>
-            <li class="plan-feature-item"><span class="feature-check">✓</span> Unlocked Skill Badges</li>
-            <li class="plan-feature-item"><span class="feature-check">✓</span> Community Forum Access</li>
-          </ul>
-          <button class="btn-clay btn-clay-secondary" onclick="openEnrollModal('Starter Explorer Plan')">Start Free Trial</button>
-        </div>
-
-        <!-- Plan 2 (Featured) -->
-        <div class="clay-pricing-card featured">
-          <span class="featured-badge">MOST POPULAR</span>
-          <h3 class="plan-name">Super Scholar</h3>
-          <p class="plan-desc">Unlimited access for ambitious young learners!</p>
-          <div class="plan-price-box">
-            <span class="plan-price">$24</span>
-            <span class="plan-period">/ month</span>
-          </div>
-          <ul class="plan-features">
-            <li class="plan-feature-item"><span class="feature-check">✓</span> 280+ All Courses & Quests</li>
-            <li class="plan-feature-item"><span class="feature-check">✓</span> Real-Time Analytics Dashboard</li>
-            <li class="plan-feature-item"><span class="feature-check">✓</span> Live Mentor Q&A Sessions</li>
-            <li class="plan-feature-item"><span class="feature-check">✓</span> Official Skill Certificates</li>
-            <li class="plan-feature-item"><span class="feature-check">✓</span> Multi-Device Sync</li>
-          </ul>
-          <button class="btn-clay btn-clay-primary" onclick="openEnrollModal('Super Scholar Plan')">Join Super Scholar</button>
-        </div>
-
-        <!-- Plan 3 -->
-        <div class="clay-pricing-card">
-          <h3 class="plan-name">Family Squad</h3>
-          <p class="plan-desc">Full access for up to 4 accounts with 1-on-1 tutoring.</p>
-          <div class="plan-price-box">
-            <span class="plan-price">$49</span>
-            <span class="plan-period">/ month</span>
-          </div>
-          <ul class="plan-features">
-            <li class="plan-feature-item"><span class="feature-check">✓</span> Up to 4 Student Accounts</li>
-            <li class="plan-feature-item"><span class="feature-check">✓</span> Everything in Super Scholar</li>
-            <li class="plan-feature-item"><span class="feature-check">✓</span> 1-on-1 Monthly Tutoring Session</li>
-            <li class="plan-feature-item"><span class="feature-check">✓</span> Dedicated Family Advisor</li>
-          </ul>
-          <button class="btn-clay btn-clay-indigo" onclick="openEnrollModal('Family Squad Plan')">Get Family Squad</button>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- FAQ SECTION -->
-  <section class="faq-section" id="faq">
-    <div class="container">
-      <div class="section-header">
-        <span class="section-subtitle">GOT QUESTIONS?</span>
-        <h2 class="section-title">Frequently Asked Questions</h2>
-        <p class="section-desc">Everything you need to know about LearnSphere quests, age ranges, and subscriptions.</p>
-      </div>
-
-      <div class="faq-list">
-        <div class="clay-faq-card open">
-          <div class="faq-question">
-            <span>What age group is LearnSphere designed for?</span>
-            <span class="faq-toggle-icon">▼</span>
-          </div>
-          <div class="faq-answer">
-            LearnSphere is designed for students aged 7 to 17! Quests are categorized into Beginner, Intermediate, and Advanced levels, allowing younger kids and teenagers to learn at their own pace.
-          </div>
-        </div>
-
-        <div class="clay-faq-card">
-          <div class="faq-question">
-            <span>Do we need to install any special software for coding or 3D art?</span>
-            <span class="faq-toggle-icon">▼</span>
-          </div>
-          <div class="faq-answer">
-            No! All interactive coding sandboxes, Python environments, and 3D preview tools run directly inside your web browser. You only need an internet connection and a computer or tablet.
-          </div>
-        </div>
-
-        <div class="clay-faq-card">
-          <div class="faq-question">
-            <span>Can parents track their child's progress?</span>
-            <span class="faq-toggle-icon">▼</span>
-          </div>
-          <div class="faq-answer">
-            Yes! Parents get access to a dedicated Parent Dashboard with weekly progress emails, time spent per subject, certificates earned, and skill mastery milestones.
-          </div>
-        </div>
-
-        <div class="clay-faq-card">
-          <div class="faq-question">
-            <span>Can I cancel or change my plan anytime?</span>
-            <span class="faq-toggle-icon">▼</span>
-          </div>
-          <div class="faq-answer">
-            Absolutely. There are no contracts or hidden fees. You can upgrade, downgrade, or cancel your subscription at any time with a single click in your settings.
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- FOOTER -->
-  <footer class="footer">
-    <div class="container">
-      <div class="footer-grid">
-        <div>
-          <div class="footer-brand-title">🎓 LearnSphere</div>
-          <p class="footer-desc">
-            Empowering the next generation of creators, coders, and thinkers through playful gamified education.
-          </p>
-        </div>
-
-        <div>
-          <h4 class="footer-heading">Explore Quests</h4>
-          <ul class="footer-links">
-            <li class="footer-link-item"><a href="#courses" class="footer-link">Python & Coding</a></li>
-            <li class="footer-link-item"><a href="#courses" class="footer-link">3D Digital Art</a></li>
-            <li class="footer-link-item"><a href="#courses" class="footer-link">Math & Logic Arena</a></li>
-            <li class="footer-link-item"><a href="#courses" class="footer-link">Astronomy & Space</a></li>
-          </ul>
-        </div>
-
-        <div>
-          <h4 class="footer-heading">Platform</h4>
-          <ul class="footer-links">
-            <li class="footer-link-item"><a href="#progress" class="footer-link">Progress Tracking</a></li>
-            <li class="footer-link-item"><a href="#testimonials" class="footer-link">Parent Reviews</a></li>
-            <li class="footer-link-item"><a href="#pricing" class="footer-link">Pricing Plans</a></li>
-            <li class="footer-link-item"><a href="#faq" class="footer-link">Help & FAQs</a></li>
-          </ul>
-        </div>
-
-        <div>
-          <h4 class="footer-heading">Stay Updated</h4>
-          <p style="color: #A5B4FC; font-weight: 600; font-size: 0.9rem; margin-bottom: 1rem;">
-            Subscribe to get weekly free coding challenges & learning tips:
-          </p>
-          <form class="newsletter-form" onsubmit="event.preventDefault(); alert('Subscribed to newsletter!');">
-            <input type="email" class="newsletter-input" placeholder="Your email..." required>
-            <button type="submit" class="btn-clay btn-clay-primary" style="padding: 0.75rem 1.25rem;">Join</button>
-          </form>
-        </div>
-      </div>
-
-      <div class="footer-bottom">
-        <p>&copy; 2026 LearnSphere Inc. All rights reserved. Designed with Claymorphic Playful Style.</p>
-      </div>
-    </div>
-  </footer>
-
-  <!-- ENROLLMENT MODAL -->
-  <div class="modal-overlay" id="modalOverlay">
-    <div class="clay-modal">
-      <button class="modal-close-btn" id="modalCloseBtn" aria-label="Close modal">✕</button>
-
-      <h2 class="modal-title" id="modalTitle">🚀 Enroll in LearnSphere Quest</h2>
-      <p class="modal-desc">Start your 14-day free trial. Instant access to interactive courses and progress tracking!</p>
-
-      <form id="enrollForm">
-        <div class="form-group">
-          <label class="form-label" for="studentNameInput">Student Name</label>
-          <input type="text" class="form-control" id="studentNameInput" placeholder="e.g. Leo Martinez" required>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="parentEmailInput">Parent / Student Email</label>
-          <input type="email" class="form-control" id="parentEmailInput" placeholder="name@example.com" required>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="courseSelectInput">Selected Quest / Plan</label>
-          <select class="form-control" id="courseSelectInput">
-            <option value="Python Quest: Build 5 Retro Games">Python Quest: Build 5 Retro Games ($29/mo)</option>
-            <option value="3D Character Sculpting in Blender">3D Character Sculpting in Blender ($35/mo)</option>
-            <option value="Space Explorers: Black Holes & Beyond">Space Explorers: Black Holes & Beyond ($25/mo)</option>
-            <option value="Math Marvels: Algebra Game Arena">Math Marvels: Algebra Game Arena ($22/mo)</option>
-            <option value="Super Scholar Plan">Super Scholar Plan ($24/mo)</option>
-            <option value="Family Squad Plan">Family Squad Plan ($49/mo)</option>
-          </select>
-        </div>
-
-        <button type="submit" class="btn-clay btn-clay-primary" style="width: 100%; padding: 1rem; font-size: 1.1rem; margin-top: 1rem;">
-          🎉 Start 14-Day Free Quest Now
+        <button id="btnGoogleLogin" class="btn-google">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+          </svg>
+          เข้าสู่ระบบด้วย Google
         </button>
-      </form>
+        <div class="auth-footer">
+          <p>&copy; 2026 ระบบคลังเอกสาร All rights reserved.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Pending Page -->
+    <div id="pendingPage" class="auth-page hidden">
+      <div class="auth-card">
+        <span class="pending-icon">⏳</span>
+        <h2 style="margin-bottom:0.75rem">กำลังรอการอนุมัติ</h2>
+        <p id="pendingEmail" style="font-weight:600;color:var(--accent-primary);margin-bottom:0.5rem">user@example.com</p>
+        <p style="color:var(--text-secondary);font-size:0.9rem;margin-bottom:1.5rem">กรุณารอสักครู่ ผู้ดูแลระบบจะอนุมัติบัญชีของคุณเร็วๆ นี้</p>
+        <button id="btnPendingLogout" class="btn-secondary">ออกจากระบบ</button>
+      </div>
+    </div>
+
+    <!-- 3. Rejected Page -->
+    <div id="rejectedPage" class="auth-page hidden">
+      <div class="auth-card">
+        <span class="rejected-icon">🚫</span>
+        <h2 style="margin-bottom:0.75rem">คำขอถูกปฏิเสธ</h2>
+        <p id="rejectedReason" style="color:var(--danger-color);font-size:0.9rem;margin-bottom:0.5rem">ไม่พบสิทธิ์การใช้งานสำหรับอีเมลนี้</p>
+        <p style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:1.5rem">กรุณาติดต่อผู้ดูแลระบบ</p>
+        <button id="btnRejectedLogout" class="btn-secondary">ออกจากระบบ</button>
+      </div>
+    </div>
+
+    <!-- 4. Main App -->
+    <div id="mainApp" class="hidden">
+      <!-- Sidebar -->
+      <aside id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+          <div class="sidebar-logo">
+            <div class="sidebar-logo-icon">📑</div>
+            <div class="sidebar-logo-text">
+              คลังเอกสาร
+              <small>Document Management</small>
+            </div>
+          </div>
+          <button id="btnToggleSidebar">☰</button>
+        </div>
+        <nav class="sidebar-nav">
+          <a href="#" id="navDashboard">
+            <span class="nav-icon">📊</span>
+            <span class="sidebar-label">Dashboard</span>
+          </a>
+          <a href="#" id="navTopics">
+            <span class="nav-icon">📁</span>
+            <span class="sidebar-label">เอกสารทั้งหมด</span>
+          </a>
+          <a href="#" id="navCategories" class="admin-only">
+            <span class="nav-icon">🏷️</span>
+            <span class="sidebar-label">หมวดหมู่</span>
+          </a>
+          <a href="#" id="navUsers" class="admin-only">
+            <span class="nav-icon">👥</span>
+            <span class="sidebar-label">จัดการผู้ใช้</span>
+          </a>
+          <a href="#" id="navTrash">
+            <span class="nav-icon">🗑️</span>
+            <span class="sidebar-label">ถังขยะ</span>
+          </a>
+        </nav>
+        <div class="sidebar-footer">
+          <div class="user-profile">
+            <div class="user-avatar" id="sidebarAvatar">U</div>
+            <div class="sidebar-user-info">
+              <div id="sidebarUserName">User Name</div>
+              <span id="sidebarUserRole" class="role-badge">Viewer</span>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main Content -->
+      <main id="mainContent" class="main-content">
+        <!-- Top Bar -->
+        <header class="top-bar">
+          <button id="btnMobileMenu" class="mobile-menu-btn">☰</button>
+          <h2 id="pageTitle">Dashboard</h2>
+          <div class="top-bar-right">
+            <div class="search-wrapper">
+              <span class="search-icon">🔍</span>
+              <input type="text" id="globalSearchInput" placeholder="ค้นหาเอกสาร..." class="search-input">
+            </div>
+            
+            <!-- Settings Dropdown -->
+            <div class="settings-dropdown-wrapper">
+              <button id="btnSidebarSettings" class="notif-btn" title="ตั้งค่า">⚙️</button>
+              <div id="settingsDropdown" class="settings-dropdown hidden">
+                <button id="btnThemeToggle" class="dropdown-item">🌓 เปลี่ยนธีม</button>
+                <button id="btnLogout" class="dropdown-item text-danger">🚪 ออกจากระบบ</button>
+              </div>
+            </div>
+
+            <!-- Notifications -->
+            <button id="btnNotifications" class="notif-btn">
+              🔔
+              <span id="notificationBadge" class="notif-badge hidden">0</span>
+            </button>
+          </div>
+        </header>
+
+        <!-- Dashboard Page -->
+        <section id="dashboardPage" class="page">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon">📄</div>
+              <div class="stat-info">
+                <div id="statTopics" class="stat-value">0</div>
+                <div class="stat-label">จำนวนหัวข้อ</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">📎</div>
+              <div class="stat-info">
+                <div id="statFiles" class="stat-value">0</div>
+                <div class="stat-label">จำนวนไฟล์</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">💾</div>
+              <div class="stat-info">
+                <div id="statStorage" class="stat-value">0 MB</div>
+                <div class="stat-label">พื้นที่ใช้ไป</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">👥</div>
+              <div class="stat-info">
+                <div id="statUsers" class="stat-value">0</div>
+                <div class="stat-label">ผู้ใช้งาน</div>
+              </div>
+            </div>
+          </div>
+          <div class="dashboard-grid">
+            <div class="dashboard-card chart-container">
+              <div class="dashboard-card-header">
+                <h3>เอกสารตามหมวดหมู่</h3>
+              </div>
+              <div id="categoryChart" style="min-height:160px;display:flex;align-items:center;justify-content:center;color:var(--text-muted)">📊 ข้อมูลจะแสดงที่นี่</div>
+            </div>
+            <div class="dashboard-card">
+              <div class="dashboard-card-header">
+                <h3>เพิ่มล่าสุด</h3>
+              </div>
+              <ul id="recentTopicsList"></ul>
+            </div>
+            <div class="dashboard-card">
+              <div class="dashboard-card-header">
+                <h3>อัปโหลดล่าสุด (3 อันดับแรก)</h3>
+              </div>
+              <ul id="recentActivityList"></ul>
+            </div>
+          </div>
+        </section>
+
+        <!-- Topics Page -->
+        <section id="topicsPage" class="page hidden">
+          <div class="page-header">
+            <div class="filters-bar">
+              <select id="filterCategory" class="filter-select">
+                <option value="">ทุกหมวดหมู่</option>
+              </select>
+              <select id="filterFileType" class="filter-select">
+                <option value="">ทุกประเภทไฟล์</option>
+              </select>
+              <select id="sortTopics" class="filter-select">
+                <option value="newest">ใหม่ล่าสุด</option>
+                <option value="oldest">เก่าที่สุด</option>
+                <option value="name_asc">ชื่อ ก-ฮ</option>
+              </select>
+            </div>
+            <div class="actions-bar">
+              <div class="view-toggles">
+                <button id="btnViewGrid" class="btn-icon active">⊞</button>
+                <button id="btnViewList" class="btn-icon">☰</button>
+              </div>
+              <button id="btnAddTopic" class="btn-action editor-action">
+                <span class="icon">+</span> เพิ่มเอกสาร
+              </button>
+            </div>
+          </div>
+          <div id="topicsList" class="topics-grid">
+            <!-- Topic cards rendered by JS -->
+          </div>
+          <div id="topicsLoading" class="loading-spinner hidden"></div>
+          <div id="topicsEmpty" class="empty-state hidden">
+            <div class="empty-illustration">📂</div>
+            <p>ยังไม่มีเอกสาร</p>
+          </div>
+          <div id="topicsPagination" class="pagination"></div>
+        </section>
+
+        <!-- Topic Detail Page -->
+        <section id="topicDetailPage" class="page hidden">
+          <div class="page-header flex-between">
+            <div class="flex gap-4">
+              <button id="btnBackToTopics" class="btn-icon">←</button>
+              <h2 id="topicDetailTitle">ชื่อหัวข้อเอกสาร</h2>
+            </div>
+            <div class="detail-actions">
+              <button id="btnShareTopic" class="btn-secondary editor-action">🔗 แชร์</button>
+              <button id="btnEditTopic" class="btn-secondary editor-action">✏️ แก้ไข</button>
+              <button id="btnDeleteTopic" class="btn-danger editor-action">🗑️ ลบ</button>
+            </div>
+          </div>
+          <div class="topic-detail-content">
+            <div class="topic-meta glass-panel">
+              <span id="topicDetailCategory" class="category-badge">หมวดหมู่</span>
+              <div id="topicDetailTags" class="tags-list"></div>
+              <div class="meta-info">
+                <span class="meta-item">สร้างโดย: <strong id="topicDetailCreatedBy">-</strong></span>
+                <span class="meta-item">วันที่: <strong id="topicDetailDate">-</strong></span>
+                <span class="meta-item">สิทธิ์: <span id="topicDetailVisibility" class="badge">สาธารณะ</span></span>
+              </div>
+              <p id="topicDetailDescription" class="topic-description"></p>
+            </div>
+            <div class="topic-files glass-panel">
+              <div class="files-header">
+                <h3>ไฟล์แนบ <span id="topicDetailFileCount" class="count-badge">0</span></h3>
+                <button id="btnUploadMore" class="btn-secondary editor-action">+ อัปโหลดไฟล์เพิ่ม</button>
+              </div>
+              <div id="topicFilesList" class="files-list">
+                <!-- File items rendered by JS -->
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Categories Page (Admin) -->
+        <section id="categoriesPage" class="page hidden admin-only">
+          <div class="page-header flex-end" style="justify-content: flex-end;">
+            <button id="btnAddCategory" class="btn-primary">+ เพิ่มหมวดหมู่</button>
+          </div>
+          <div id="categoriesList" class="categories-grid">
+            <!-- Category cards rendered by JS -->
+          </div>
+        </section>
+
+        <!-- Users Page (Admin) -->
+        <section id="usersPage" class="page hidden admin-only">
+          <div class="page-header flex-between">
+            <div class="tabs" style="margin-left: auto;">
+              <button id="tabPending" class="tab-btn active">
+                รอการอนุมัติ <span id="pendingCount" class="badge bg-danger">0</span>
+              </button>
+              <button id="tabAllUsers" class="tab-btn">ทั้งหมด</button>
+            </div>
+          </div>
+          <div id="pendingUsersList" class="users-list">
+            <!-- Pending user cards -->
+          </div>
+          <div id="allUsersList" class="users-list hidden">
+            <!-- All user rows -->
+          </div>
+        </section>
+
+        <!-- Trash Page -->
+        <section id="trashPage" class="page hidden">
+          <div class="page-header flex-end" style="justify-content: flex-end;">
+            <button id="btnEmptyTrash" class="btn-danger admin-only">ล้างถังขยะ</button>
+          </div>
+          <div id="trashList" class="topics-grid">
+            <!-- Deleted topic cards -->
+          </div>
+          <div id="trashEmpty" class="empty-state hidden">
+            <div class="empty-illustration">🗑️</div>
+            <p>ถังขยะว่างเปล่า</p>
+          </div>
+        </section>
+      </main>
     </div>
   </div>
 
-  <!-- JavaScript -->
-  <script src="js/app.js?v=2.0.0"></script>
+  <!-- MODALS -->
+
+  <!-- Topic Modal (Create/Edit) -->
+  <div id="topicModal" class="modal-overlay hidden">
+    <div class="modal glass-panel">
+      <div class="modal-header">
+        <h3 id="topicModalTitle">สร้างหัวข้อใหม่</h3>
+        <button id="btnCloseTopicModal" class="btn-icon">✕</button>
+      </div>
+      <form id="topicForm" class="modal-body">
+        <div class="form-group">
+          <label for="topicTitleInput">ชื่อหัวข้อ <span class="text-danger">*</span></label>
+          <input type="text" id="topicTitleInput" required class="form-input">
+        </div>
+        <div class="form-group">
+          <label for="topicDescInput">รายละเอียด</label>
+          <textarea id="topicDescInput" class="form-input" rows="3"></textarea>
+        </div>
+        <div class="form-group flex gap-4">
+          <div class="flex-1">
+            <label for="topicCategorySelect">หมวดหมู่ <span class="text-danger">*</span></label>
+            <select id="topicCategorySelect" required class="form-input"></select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="topicTagsInput">Tags (กด Enter เพื่อเพิ่ม)</label>
+          <input type="text" id="topicTagsInput" class="form-input" placeholder="เช่น รายงาน, 2026">
+          <div id="topicTagsList" class="tags-list mt-2"></div>
+        </div>
+        
+        <div class="form-group">
+          <label>การเข้าถึง</label>
+          <div class="radio-group">
+            <label class="radio-label">
+              <input type="radio" id="visibilityPublic" name="visibility" value="public" checked>
+              ทุกคนในระบบ
+            </label>
+            <label class="radio-label">
+              <input type="radio" id="visibilityRestricted" name="visibility" value="restricted">
+              เฉพาะคนที่เลือก
+            </label>
+          </div>
+        </div>
+        
+        <div id="allowedViewersSection" class="form-group hidden">
+          <label class="form-label">เลือกผู้เข้าถึงจากระบบ</label>
+          <div class="flex gap-2">
+            <select id="viewerEmailSelect" class="form-input">
+              <option value="">-- กำลังโหลดผู้ใช้งาน --</option>
+            </select>
+            <button type="button" id="btnAddViewer" class="btn-secondary">เพิ่ม</button>
+          </div>
+          <div id="viewersList" class="viewers-list mt-2"></div>
+          <div id="suggestedViewers" class="suggested-users mt-2"></div>
+        </div>
+
+        <div class="form-group">
+          <label>ไฟล์แนบ</label>
+          <div id="topicDropZone" class="drop-zone">
+            <span class="drop-icon">☁️</span>
+            <p>ลากไฟล์มาวางที่นี่ หรือคลิกเพื่อเลือกไฟล์</p>
+            <input type="file" id="topicFileInput" multiple class="hidden">
+          </div>
+          <div id="topicFilePreview" class="file-preview-list mt-4"></div>
+        </div>
+      </form>
+      <div class="modal-footer flex-between">
+        <div id="uploadProgress" class="progress-container hidden">
+          <div class="progress-bar"></div>
+        </div>
+        <div class="flex gap-2 ml-auto">
+          <button type="button" class="btn-secondary" onclick="document.getElementById('topicModal').classList.add('hidden')">ยกเลิก</button>
+          <button type="button" id="btnSubmitTopic" class="btn-primary">บันทึก</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Category Modal -->
+  <div id="categoryModal" class="modal-overlay hidden">
+    <div class="modal modal-sm glass-panel">
+      <div class="modal-header">
+        <h3 id="categoryModalTitle">เพิ่มหมวดหมู่</h3>
+        <button class="btn-icon" onclick="document.getElementById('categoryModal').classList.add('hidden')">✕</button>
+      </div>
+      <form id="categoryForm" class="modal-body">
+        <div class="form-group">
+          <label for="categoryNameInput">ชื่อหมวดหมู่</label>
+          <input type="text" id="categoryNameInput" required class="form-input">
+        </div>
+        <div class="form-group">
+          <label for="categoryParentSelect">หมวดหมู่แม่</label>
+          <select id="categoryParentSelect" class="form-input">
+            <option value="">— ไม่มี (เป็นหมวดหมู่หลัก) —</option>
+          </select>
+        </div>
+        <div class="form-group flex gap-4">
+          <div class="flex-1">
+            <label for="categoryColorInput">สี</label>
+            <input type="color" id="categoryColorInput" class="form-color" value="#6366F1">
+          </div>
+          <div class="flex-1">
+            <label for="categoryIconInput">ไอคอน (Emoji)</label>
+            <select id="categoryIconInput" class="form-input">
+              <option value="📁">📁 โฟลเดอร์ (📁)</option>
+              <option value="📂">📂 โฟลเดอร์เปิด (📂)</option>
+              <option value="📄">📄 เอกสาร (📄)</option>
+              <option value="📎">📎 คลิปกระดาษ (📎)</option>
+              <option value="🏷️">🏷️ ป้ายกำกับ (🏷️)</option>
+              <option value="👥">👥 กลุ่มคน (👥)</option>
+              <option value="🗑️">🗑️ ถังขยะ (🗑️)</option>
+              <option value="📊">📊 กราฟ (📊)</option>
+              <option value="💼">💼 กระเป๋า (💼)</option>
+              <option value="📅">📅 ปฏิทิน (📅)</option>
+              <option value="📌">📌 หมุดปัก (📌)</option>
+              <option value="📝">📝 บันทึก (📝)</option>
+              <option value="🔍">🔍 ค้นหา (🔍)</option>
+              <option value="🔑">🔑 กุญแจ (🔑)</option>
+              <option value="📢">📢 ข่าวสาร (📢)</option>
+              <option value="⚙️">⚙️ ตั้งค่า (⚙️)</option>
+              <option value="💾">💾 บันทึก (💾)</option>
+              <option value="✉️">✉️ จดหมาย (✉️)</option>
+              <option value="📙">📙 หนังสือส้ม (📙)</option>
+              <option value="📘">📘 หนังสือฟ้า (📘)</option>
+              <option value="📕">📕 หนังสือแดง (📕)</option>
+              <option value="📗">📗 หนังสือเขียว (📗)</option>
+              <option value="🏢">🏢 สำนักงาน (🏢)</option>
+              <option value="💰">💰 การเงิน (💰)</option>
+              <option value="⚖️">⚖️ กฎหมาย (⚖️)</option>
+              <option value="🎓">🎓 การศึกษา (🎓)</option>
+            </select>
+          </div>
+        </div>
+      </form>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" onclick="document.getElementById('categoryModal').classList.add('hidden')">ยกเลิก</button>
+        <button type="button" id="btnSubmitCategory" class="btn-primary">บันทึก</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Share Modal -->
+  <div id="shareModal" class="modal-overlay hidden">
+    <div class="modal glass-panel">
+      <div class="modal-header">
+        <h3>กำหนดผู้ที่เข้าถึงได้</h3>
+        <button class="btn-icon" onclick="document.getElementById('shareModal').classList.add('hidden')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>เพิ่มผู้ที่มีสิทธิ์เข้าถึง (อีเมล)</label>
+          <div class="flex gap-2">
+            <input type="email" id="shareEmailInput" class="form-input" placeholder="ใส่อีเมลที่นี่...">
+            <button type="button" id="btnAddShareEmail" class="btn-primary">เพิ่ม</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>ผู้ที่มีสิทธิ์ปัจจุบัน</label>
+          <div id="shareViewersList" class="viewers-list"></div>
+        </div>
+        <div class="form-group mt-4 pt-4 border-t">
+          <label class="checkbox-label">
+            <input type="checkbox" id="syncDriveCheckbox" checked>
+            ซิงค์สิทธิ์กับ Google Drive อัตโนมัติ
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" onclick="document.getElementById('shareModal').classList.add('hidden')">ยกเลิก</button>
+        <button type="button" id="btnSaveShare" class="btn-primary">บันทึก</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirm Modal -->
+  <div id="confirmModal" class="modal-overlay hidden">
+    <div class="modal modal-sm glass-panel text-center">
+      <div id="confirmIcon" class="modal-icon text-warning mb-4 text-4xl">⚠️</div>
+      <h3 id="confirmMessage" class="mb-6">ยืนยันการทำรายการ?</h3>
+      <div class="flex gap-4 justify-center">
+        <button type="button" class="btn-secondary" onclick="document.getElementById('confirmModal').classList.add('hidden')">ยกเลิก</button>
+        <button type="button" id="btnConfirmAction" class="btn-danger">ยืนยัน</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Scripts -->
+  <script src="js/firebase-config.js?v=1.0.4"></script>
+  <script src="js/utils.js?v=1.0.4"></script>
+  <script src="js/auth.js?v=1.0.4"></script>
+  <script src="js/users.js?v=1.0.4"></script>
+  <script src="js/categories.js?v=1.0.4"></script>
+  <script src="js/topics.js?v=1.0.4"></script>
+  <script src="js/files.js?v=1.0.4"></script>
+  <script src="js/drive-permissions.js?v=1.0.4"></script>
+  <script src="js/search.js?v=1.0.4"></script>
+  <script src="js/dashboard.js?v=1.0.4"></script>
+  <script src="js/app.js?v=1.0.4"></script>
 </body>
 </html>
