@@ -1138,6 +1138,16 @@ select option {
 }
 .tag-remove:hover { color: var(--danger-color); }
 
+/* Glass Panel */
+.glass-panel {
+  background: var(--bg-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
 /* ===== TOPIC DETAIL ===== */
 .topic-detail-content { display: grid; grid-template-columns: 340px 1fr; gap: 1.5rem; }
 
