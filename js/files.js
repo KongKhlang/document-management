@@ -34,24 +34,41 @@ const Files = {
     return response;
   },
 
-  async uploadFile(file, folderId, onProgress) {
-    const metadata = {
-      name: file.name,
-      parents: [folderId]
+  async uploadFile(file, targetFolderId, onProgress) {
+    const folderId = targetFolderId || (typeof DRIVE_FOLDER_ID !== 'undefined' ? DRIVE_FOLDER_ID : null);
+    const metadata = { name: file.name };
+    if (folderId && folderId !== 'root') {
+      metadata.parents = [folderId];
+    }
+
+    const createFormData = (meta) => {
+      const form = new FormData();
+      form.append('metadata', new Blob([JSON.stringify(meta)], { type: 'application/json' }));
+      form.append('file', file);
+      return form;
     };
 
-    const form = new FormData();
-    form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-    form.append('file', file);
-
     try {
-      const response = await this.fetchWithAuth(
+      let response = await this.fetchWithAuth(
         'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webViewLink,webContentLink',
         {
           method: 'POST',
-          body: form
+          body: createFormData(metadata)
         }
       );
+
+      // Fallback to root folder if specific folderId returns 404 Not Found
+      if (response.status === 404 && metadata.parents) {
+        console.warn(`Target folder '${folderId}' not found (404). Falling back to Google Drive root...`);
+        delete metadata.parents;
+        response = await this.fetchWithAuth(
+          'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webViewLink,webContentLink',
+          {
+            method: 'POST',
+            body: createFormData(metadata)
+          }
+        );
+      }
 
       if (!response.ok) {
         const errorText = await response.text();
