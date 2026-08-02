@@ -24,18 +24,59 @@ const Auth = {
     provider.addScope(DRIVE_SCOPES);
     try {
       const result = await DMS.auth.signInWithPopup(provider);
-      DMS.googleAccessToken = result.credential.accessToken;
-      // Persist access token in sessionStorage for page refreshes
-      sessionStorage.setItem('googleAccessToken', result.credential.accessToken);
+      if (result && result.credential && result.credential.accessToken) {
+        DMS.googleAccessToken = result.credential.accessToken;
+        localStorage.setItem('googleAccessToken', result.credential.accessToken);
+        localStorage.setItem('googleAccessTokenTime', Date.now().toString());
+      }
     } catch (err) { 
       showToast('เข้าสู่ระบบล้มเหลว: ' + err.message, 'error'); 
     }
   },
 
+  async refreshGoogleToken(interactive = true) {
+    try {
+      const currentUser = DMS.auth.currentUser;
+      if (!currentUser) return null;
+
+      const provider = new firebase.auth.GoogleAuthProvider();
+      provider.addScope(DRIVE_SCOPES);
+
+      if (interactive) {
+        const result = await currentUser.reauthenticateWithPopup(provider);
+        if (result && result.credential && result.credential.accessToken) {
+          const token = result.credential.accessToken;
+          DMS.googleAccessToken = token;
+          localStorage.setItem('googleAccessToken', token);
+          localStorage.setItem('googleAccessTokenTime', Date.now().toString());
+          showToast('อัปเดตสิทธิ์ Google Drive เรียบร้อยแล้ว', 'success');
+          return token;
+        }
+      }
+    } catch (err) {
+      console.warn('Google Access Token refresh error:', err);
+    }
+    return null;
+  },
+
+  async getValidAccessToken() {
+    let token = DMS.googleAccessToken || localStorage.getItem('googleAccessToken');
+    const tokenTimeStr = localStorage.getItem('googleAccessTokenTime');
+    const tokenTime = tokenTimeStr ? parseInt(tokenTimeStr, 10) : 0;
+    const isExpired = !tokenTime || (Date.now() - tokenTime > 50 * 60 * 1000); // Expire after 50 minutes
+
+    if (!token || isExpired) {
+      console.log('Google Access Token is missing or expired. Refreshing token...');
+      token = await this.refreshGoogleToken(true);
+    }
+
+    return token;
+  },
+
   async handleSignedIn(user) {
     try {
-      // Re-hydrate the access token from session storage on refresh
-      DMS.googleAccessToken = sessionStorage.getItem('googleAccessToken');
+      // Re-hydrate the access token from localStorage on refresh
+      DMS.googleAccessToken = localStorage.getItem('googleAccessToken');
 
       const userRef = DMS.db.collection('users').doc(user.uid);
       const userDoc = await userRef.get();

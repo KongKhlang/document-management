@@ -1,8 +1,40 @@
 const Files = {
-  async uploadFile(file, folderId, onProgress) {
-    const token = this.getAccessToken();
-    if (!token) throw new Error('ไม่พบ Google Access Token กรุณาล็อกเอาต์แล้วล็อกอินใหม่อีกครั้ง');
+  async getAccessToken() {
+    if (window.Auth && typeof Auth.getValidAccessToken === 'function') {
+      return await Auth.getValidAccessToken();
+    }
+    let token = DMS.googleAccessToken || localStorage.getItem('googleAccessToken');
+    return token;
+  },
 
+  async fetchWithAuth(url, options = {}) {
+    let token = await this.getAccessToken();
+    if (!token && window.Auth && typeof Auth.refreshGoogleToken === 'function') {
+      token = await Auth.refreshGoogleToken(true);
+    }
+    if (!token) {
+      throw new Error('ไม่พบสิทธิ์ Google Drive กรุณากดเชื่อมต่อสิทธิ์อีกครั้ง');
+    }
+
+    options.headers = options.headers || {};
+    options.headers['Authorization'] = `Bearer ${token}`;
+
+    let response = await fetch(url, options);
+
+    // If 401 Unauthorized (token expired), auto refresh and retry once
+    if (response.status === 401) {
+      console.warn('Google Drive API returned 401 Unauthorized. Attempting token refresh...');
+      const newToken = await Auth.refreshGoogleToken(true);
+      if (newToken) {
+        options.headers['Authorization'] = `Bearer ${newToken}`;
+        response = await fetch(url, options);
+      }
+    }
+
+    return response;
+  },
+
+  async uploadFile(file, folderId, onProgress) {
     const metadata = {
       name: file.name,
       parents: [folderId]
@@ -13,13 +45,13 @@ const Files = {
     form.append('file', file);
 
     try {
-      const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webViewLink,webContentLink', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
-        body: form
-      });
+      const response = await this.fetchWithAuth(
+        'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webViewLink,webContentLink',
+        {
+          method: 'POST',
+          body: form
+        }
+      );
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -62,13 +94,9 @@ const Files = {
   },
   
   async deleteFile(driveFileId) {
-    const token = this.getAccessToken();
     try {
-      const response = await fetch(`https://www.googleapis.com/drive/v3/files/${driveFileId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+      const response = await this.fetchWithAuth(`https://www.googleapis.com/drive/v3/files/${driveFileId}`, {
+        method: 'DELETE'
       });
       if (!response.ok && response.status !== 404) {
         throw new Error('ไม่สามารถลบไฟล์ใน Google Drive ได้');
@@ -81,13 +109,10 @@ const Files = {
 
   async trashFile(driveFileId) {
     if (!driveFileId) return;
-    const token = this.getAccessToken();
-    if (!token) return;
     try {
-      const response = await fetch(`https://www.googleapis.com/drive/v3/files/${driveFileId}`, {
+      const response = await this.fetchWithAuth(`https://www.googleapis.com/drive/v3/files/${driveFileId}`, {
         method: 'PATCH',
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ trashed: true })
@@ -102,13 +127,10 @@ const Files = {
 
   async untrashFile(driveFileId) {
     if (!driveFileId) return;
-    const token = this.getAccessToken();
-    if (!token) return;
     try {
-      const response = await fetch(`https://www.googleapis.com/drive/v3/files/${driveFileId}`, {
+      const response = await this.fetchWithAuth(`https://www.googleapis.com/drive/v3/files/${driveFileId}`, {
         method: 'PATCH',
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ trashed: false })
@@ -123,12 +145,7 @@ const Files = {
   
   async downloadFile(driveFileId, fileName) {
     try {
-      const token = this.getAccessToken();
-      const response = await fetch(`https://www.googleapis.com/drive/v3/files/${driveFileId}?alt=media`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const response = await this.fetchWithAuth(`https://www.googleapis.com/drive/v3/files/${driveFileId}?alt=media`);
       
       if (!response.ok) throw new Error('ดาวน์โหลดล้มเหลว');
       
@@ -149,13 +166,6 @@ const Files = {
   
   getPreviewUrl(driveFileId) {
     return `https://drive.google.com/file/d/${driveFileId}/preview`;
-  },
-  
-  getAccessToken() {
-    if (!DMS.googleAccessToken) {
-      DMS.googleAccessToken = sessionStorage.getItem('googleAccessToken');
-    }
-    return DMS.googleAccessToken;
   },
   
   setupDropZone(dropZoneId, fileInputId, previewId) {

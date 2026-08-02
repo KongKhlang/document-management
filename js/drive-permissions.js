@@ -1,11 +1,9 @@
 const DrivePermissions = {
   async addPermission(fileId, email, role = 'reader') {
     try {
-      const token = Files.getAccessToken();
-      const response = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}/permissions?sendNotificationEmail=false`, {
+      const response = await Files.fetchWithAuth(`https://www.googleapis.com/drive/v3/files/${fileId}/permissions?sendNotificationEmail=false`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
@@ -28,10 +26,8 @@ const DrivePermissions = {
       const perm = permissions.find(p => p.emailAddress === email);
       if (!perm) return;
       
-      const token = Files.getAccessToken();
-      const response = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}/permissions/${perm.id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
+      const response = await Files.fetchWithAuth(`https://www.googleapis.com/drive/v3/files/${fileId}/permissions/${perm.id}`, {
+        method: 'DELETE'
       });
       if (!response.ok) throw new Error(`Failed to remove permission: ${response.statusText}`);
     } catch (error) {
@@ -68,10 +64,7 @@ const DrivePermissions = {
   
   async listPermissions(fileId) {
     try {
-      const token = Files.getAccessToken();
-      const response = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}/permissions?fields=permissions(id,emailAddress,role)`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const response = await Files.fetchWithAuth(`https://www.googleapis.com/drive/v3/files/${fileId}/permissions?fields=permissions(id,emailAddress,role)`);
       if (!response.ok) throw new Error(`Failed to list permissions: ${response.statusText}`);
       const data = await response.json();
       return data.permissions || [];
