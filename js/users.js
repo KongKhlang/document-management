@@ -214,6 +214,41 @@ const Users = {
       showToast('เกิดข้อผิดพลาด', 'error');
     }
   },
+
+  async deleteUser(uid) {
+    if(!confirm('ยืนยันการลบผู้ใช้นี้ออกจากระบบ? (สิทธิ์เข้าถึงโฟลเดอร์ Google Drive จะถูกเพิกถอน และข้อมูลผู้ใช้จะถูกลบออกจากฐานข้อมูล)')) return;
+    try {
+      const userDoc = await DMS.db.collection('users').doc(uid).get();
+      if (userDoc.exists) {
+        const userEmail = userDoc.data().email;
+        if (typeof DRIVE_FOLDER_ID !== 'undefined' && DRIVE_FOLDER_ID) {
+          showToast('กำลังยกเลิกสิทธิ์เข้าถึง Google Drive...', 'info');
+          try {
+            await DrivePermissions.removePermission(DRIVE_FOLDER_ID, userEmail);
+            showToast('ยกเลิกสิทธิ์ Google Drive สำเร็จ');
+          } catch (e) {
+            console.warn('Failed to remove Google Drive permission:', e);
+          }
+        }
+      }
+
+      await DMS.db.collection('users').doc(uid).delete();
+      
+      await DMS.db.collection('activityLog').add({
+        action: 'delete_user',
+        userId: DMS.currentUser.uid,
+        userName: DMS.currentUser.displayName,
+        details: `Deleted user ${uid}`,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      showToast('ลบผู้ใช้สำเร็จ');
+      this.loadAllUsers();
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      showToast('เกิดข้อผิดพลาดในการลบผู้ใช้', 'error');
+    }
+  },
   
   renderPendingCard(user) {
     const photo = user.photoURL || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.email);
@@ -266,11 +301,14 @@ const Users = {
         </td>
         <td style="padding: 1rem 0.75rem;">${statusBadge}</td>
         <td style="padding: 1rem 0.75rem; text-align: right;">
-          ${!isMe ? (
-            user.status === 'suspended' 
-            ? `<button onclick="Users.unsuspendUser('${escapeHtml(user.id)}')" class="btn-secondary btn-sm" style="color: var(--success-color); border-color: rgba(16,185,129,0.2);">ยกเลิกระงับ</button>`
-            : `<button onclick="Users.suspendUser('${escapeHtml(user.id)}')" class="btn-danger btn-sm">ระงับ</button>`
-          ) : ''}
+          <div class="flex gap-2 justify-end">
+            ${!isMe ? (
+              user.status === 'suspended' 
+              ? `<button onclick="Users.unsuspendUser('${escapeHtml(user.id)}')" class="btn-secondary btn-sm" style="color: var(--success-color); border-color: rgba(16,185,129,0.2);">ยกเลิกระงับ</button>`
+              : `<button onclick="Users.suspendUser('${escapeHtml(user.id)}')" class="btn-danger btn-sm" style="background: rgba(239,68,68,0.1); color: var(--danger-color); border-color: rgba(239,68,68,0.2);">ระงับ</button>`
+            ) : ''}
+            ${!isMe ? `<button onclick="Users.deleteUser('${escapeHtml(user.id)}')" class="btn-danger btn-sm">ลบ</button>` : ''}
+          </div>
         </td>
       </tr>
     `;
