@@ -1,8 +1,12 @@
 const Auth = {
   idleTimeoutTimer: null,
   IDLE_TIMEOUT_MS: 30 * 60 * 1000, // 30 นาที
+  initialized: false,
 
   init() {
+    if (this.initialized) return;
+    this.initialized = true;
+
     this.setupInactivityListener();
 
     DMS.auth.onAuthStateChanged(async (user) => {

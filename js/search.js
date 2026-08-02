@@ -1,7 +1,11 @@
 const Search = {
   searchCache: new Map(),
+  initialized: false,
   
   init() {
+    if (this.initialized) return;
+    this.initialized = true;
+
     const searchInput = document.getElementById('globalSearchInput');
     if (searchInput) {
       searchInput.addEventListener('input', debounce((e) => {

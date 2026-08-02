@@ -1,7 +1,11 @@
 const Categories = {
   categories: [],
+  initialized: false,
   
   init() {
+    if (this.initialized) return;
+    this.initialized = true;
+
     const btnAdd = document.getElementById('btnAddCategory');
     if(btnAdd) btnAdd.addEventListener('click', () => this.showCategoryModal());
 

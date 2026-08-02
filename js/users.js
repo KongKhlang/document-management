@@ -1,5 +1,9 @@
 const Users = {
+  initialized: false,
   init() {
+    if (this.initialized) return;
+    this.initialized = true;
+
     const tabPending = document.getElementById('tabPending');
     const tabAllUsers = document.getElementById('tabAllUsers');
     

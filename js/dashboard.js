@@ -1,5 +1,9 @@
 const Dashboard = {
-  init() {},
+  initialized: false,
+  init() {
+    if (this.initialized) return;
+    this.initialized = true;
+  },
   
   async loadDashboard() {
     await Promise.all([

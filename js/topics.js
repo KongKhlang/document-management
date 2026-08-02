@@ -2,8 +2,12 @@ const Topics = {
   topics: [],
   currentView: 'grid',
   tempTags: [],
+  initialized: false,
   
   init() {
+    if (this.initialized) return;
+    this.initialized = true;
+
     const bindClick = (id, handler) => {
       const el = document.getElementById(id);
       if(el) el.addEventListener('click', handler);
