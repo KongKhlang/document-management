@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   
   <!-- CSS -->
-  <link rel="stylesheet" href="css/styles.css?v=1.0.14">
+  <link rel="stylesheet" href="css/styles.css?v=1.0.16">
   
   <!-- Firebase SDK (v10 modular via CDN compat) -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -239,32 +239,67 @@
 
         <!-- Topic Detail Page -->
         <section id="topicDetailPage" class="page hidden">
-          <div class="page-header flex-between">
-            <div class="flex gap-4">
-              <button id="btnBackToTopics" class="btn-icon">←</button>
-              <h2 id="topicDetailTitle">ชื่อหัวข้อเอกสาร</h2>
+          <div class="page-header flex-between items-center mb-4">
+            <div class="flex items-center gap-3">
+              <button id="btnBackToTopics" class="btn-back-arrow" title="ย้อนกลับ">←</button>
+              <h2 id="topicDetailTitle" class="detail-page-title">ทดสอบ 1</h2>
             </div>
-            <div class="detail-actions">
-              <button id="btnEditTopic" class="btn-secondary editor-action">✏️ แก้ไข</button>
-              <button id="btnDeleteTopic" class="btn-danger editor-action">🗑️ ลบ</button>
+            <div class="detail-actions flex items-center gap-2">
+              <button id="btnEditTopic" class="btn-pill-grey editor-action">✏️ Edit</button>
+              <button id="btnDeleteTopic" class="btn-pill-red editor-action">🗑️ Delete</button>
             </div>
           </div>
-          <div class="topic-detail-content">
-            <div class="topic-meta glass-panel">
-              <span id="topicDetailCategory" class="category-badge">หมวดหมู่</span>
-              <div id="topicDetailTags" class="tags-list"></div>
-              <div class="meta-info">
-                <span class="meta-item">สร้างโดย: <strong id="topicDetailCreatedBy">-</strong></span>
-                <span class="meta-item">วันที่: <strong id="topicDetailDate">-</strong></span>
-                <span class="meta-item">สิทธิ์: <span id="topicDetailVisibility" class="badge">สาธารณะ</span></span>
+
+          <div class="topic-detail-grid">
+            <!-- Left Card: Document Info -->
+            <div class="doc-info-card">
+              <div class="doc-info-header">
+                <h3 class="doc-info-title">Document Info</h3>
+                <div class="doc-info-subtitle">รายละเอียดเพิ่มเติม</div>
               </div>
-              <p id="topicDetailDescription" class="topic-description"></p>
+              <div class="doc-info-divider"></div>
+              <div class="meta-info-list">
+                <div class="meta-line">
+                  <span class="meta-icon">👤</span>
+                  <span class="meta-label">สร้างโดย:</span>
+                  <strong id="topicDetailCreatedBy" class="meta-value">-</strong>
+                </div>
+                <div class="meta-line">
+                  <span class="meta-icon">📅</span>
+                  <span class="meta-label">วันที่:</span>
+                  <strong id="topicDetailDate" class="meta-value">-</strong>
+                </div>
+                <div class="meta-line flex items-center flex-wrap gap-1">
+                  <span class="meta-icon">🔐</span>
+                  <span class="meta-label">สิทธิ์:</span>
+                  <strong id="topicDetailVisibility" class="meta-value">ส่วนตัว</strong>
+                  <span class="meta-icon ml-2">🏅</span>
+                  <span class="meta-label">แอดมิน:</span>
+                  <strong id="topicDetailAdminBadge" class="meta-value">-</strong>
+                </div>
+              </div>
+              
+              <div class="category-pill-wrapper mt-4">
+                <span id="topicDetailCategory" class="category-pill-purple">บันทึกข้อความ</span>
+              </div>
+              
+              <div id="topicDetailTags" class="tags-list mt-3"></div>
+              <p id="topicDetailDescription" class="topic-description mt-3">-</p>
             </div>
-            <div class="topic-files glass-panel">
-              <div class="files-header">
-                <h3>ไฟล์แนบ <span id="topicDetailFileCount" class="count-badge">0</span></h3>
-                <button id="btnUploadMore" class="btn-secondary editor-action">+ อัปโหลดไฟล์เพิ่ม</button>
+
+            <!-- Right Card: Attached Files -->
+            <div class="doc-files-card">
+              <div class="files-card-top flex-between items-center mb-3">
+                <h3 class="files-card-header-title">
+                  (ไฟล์แนบ <span id="topicDetailFileCount">0 ไฟล์</span>)
+                </h3>
+                <button id="btnUploadMore" class="btn-outline-pill editor-action">+ อัปโหลดไฟล์เพิ่ม</button>
               </div>
+
+              <div class="files-subheader-bar">
+                <span>ไฟล์แนบ</span>
+              </div>
+
               <div id="topicFilesList" class="files-list">
                 <!-- File items rendered by JS -->
               </div>
@@ -511,16 +546,16 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- Scripts -->
-  <script src="js/firebase-config.js?v=1.0.15"></script>
-  <script src="js/utils.js?v=1.0.15"></script>
-  <script src="js/auth.js?v=1.0.15"></script>
-  <script src="js/users.js?v=1.0.15"></script>
-  <script src="js/categories.js?v=1.0.15"></script>
-  <script src="js/topics.js?v=1.0.15"></script>
-  <script src="js/files.js?v=1.0.15"></script>
-  <script src="js/drive-permissions.js?v=1.0.15"></script>
-  <script src="js/search.js?v=1.0.15"></script>
-  <script src="js/dashboard.js?v=1.0.15"></script>
-  <script src="js/app.js?v=1.0.15"></script>
+  <script src="js/firebase-config.js?v=1.0.16"></script>
+  <script src="js/utils.js?v=1.0.16"></script>
+  <script src="js/auth.js?v=1.0.16"></script>
+  <script src="js/users.js?v=1.0.16"></script>
+  <script src="js/categories.js?v=1.0.16"></script>
+  <script src="js/topics.js?v=1.0.16"></script>
+  <script src="js/files.js?v=1.0.16"></script>
+  <script src="js/drive-permissions.js?v=1.0.16"></script>
+  <script src="js/search.js?v=1.0.16"></script>
+  <script src="js/dashboard.js?v=1.0.16"></script>
+  <script src="js/app.js?v=1.0.16"></script>
 </body>
 </html>
