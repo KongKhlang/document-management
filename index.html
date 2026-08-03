@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   
   <!-- CSS -->
-  <link rel="stylesheet" href="css/styles.css?v=1.0.35">
+  <link rel="stylesheet" href="css/styles.css?v=1.0.36">
   
   <!-- Firebase SDK (v10 modular via CDN compat) -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -403,14 +403,16 @@
         </div>
 
         <div class="form-group">
-          <label>ไฟล์แนบ</label>
+          <div class="flex-between" style="margin-bottom: 0.5rem;">
+            <label style="margin-bottom: 0;">ไฟล์แนบ</label>
+            <button type="button" id="btnAddMoreFilesBtn" class="btn-success hidden">➕ เพิ่มไฟล์แนบ</button>
+          </div>
           <div id="topicDropZone" class="drop-zone">
             <span class="drop-icon">☁️</span>
             <p>ลากไฟล์มาวางที่นี่ หรือคลิกเพื่อเลือกไฟล์</p>
             <input type="file" id="topicFileInput" multiple class="hidden">
           </div>
           <div id="topicFilePreview" class="file-preview-list mt-4"></div>
-          <button type="button" id="btnAddMoreFilesBtn" class="btn-outline-pill hidden" style="font-size: 0.82rem; padding: 0.45rem 1.25rem; margin-top: 0.75rem; border-radius: var(--radius-full); width: fit-content; display: inline-flex; align-items: center; gap: 0.4rem;">➕ เพิ่มไฟล์แนบ</button>
         </div>
       </form>
       <div class="modal-footer flex-between">
@@ -537,16 +539,16 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- Scripts -->
-  <script src="js/firebase-config.js?v=1.0.35"></script>
-  <script src="js/utils.js?v=1.0.35"></script>
-  <script src="js/auth.js?v=1.0.35"></script>
-  <script src="js/users.js?v=1.0.35"></script>
-  <script src="js/categories.js?v=1.0.35"></script>
-  <script src="js/topics.js?v=1.0.35"></script>
-  <script src="js/files.js?v=1.0.35"></script>
-  <script src="js/drive-permissions.js?v=1.0.35"></script>
-  <script src="js/search.js?v=1.0.35"></script>
-  <script src="js/dashboard.js?v=1.0.35"></script>
-  <script src="js/app.js?v=1.0.35"></script>
+  <script src="js/firebase-config.js?v=1.0.36"></script>
+  <script src="js/utils.js?v=1.0.36"></script>
+  <script src="js/auth.js?v=1.0.36"></script>
+  <script src="js/users.js?v=1.0.36"></script>
+  <script src="js/categories.js?v=1.0.36"></script>
+  <script src="js/topics.js?v=1.0.36"></script>
+  <script src="js/files.js?v=1.0.36"></script>
+  <script src="js/drive-permissions.js?v=1.0.36"></script>
+  <script src="js/search.js?v=1.0.36"></script>
+  <script src="js/dashboard.js?v=1.0.36"></script>
+  <script src="js/app.js?v=1.0.36"></script>
 </body>
 </html>
