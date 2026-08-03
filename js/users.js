@@ -155,7 +155,16 @@ const Users = {
   },
   
   async changeRole(uid, newRole) {
+    if (uid === DMS.currentUser.uid) {
+      showToast('ไม่สามารถเปลี่ยนสิทธิ์ของตัวเองได้', 'error');
+      return;
+    }
     try {
+      const userDoc = await DMS.db.collection('users').doc(uid).get();
+      if (userDoc.exists && userDoc.data().email && DMS.currentUser.email && userDoc.data().email.toLowerCase() === DMS.currentUser.email.toLowerCase()) {
+        showToast('ไม่สามารถเปลี่ยนสิทธิ์ของตัวเองได้', 'error');
+        return;
+      }
       await DMS.db.collection('users').doc(uid).update({ role: newRole });
       showToast('เปลี่ยนสิทธิ์สำเร็จ');
     } catch (error) {
@@ -165,11 +174,20 @@ const Users = {
   },
 
   async suspendUser(uid) {
-    if(!confirm('ยืนยันการระงับผู้ใช้นี้?')) return;
+    if (uid === DMS.currentUser.uid) {
+      showToast('ไม่สามารถระงับตัวเองได้', 'error');
+      return;
+    }
     try {
       const userDoc = await DMS.db.collection('users').doc(uid).get();
       if (userDoc.exists) {
-        const userEmail = userDoc.data().email;
+        const userData = userDoc.data();
+        if (userData.email && DMS.currentUser.email && userData.email.toLowerCase() === DMS.currentUser.email.toLowerCase()) {
+          showToast('ไม่สามารถระงับตัวเองได้', 'error');
+          return;
+        }
+        if(!confirm('ยืนยันการระงับผู้ใช้นี้?')) return;
+        const userEmail = userData.email;
         if (typeof DRIVE_FOLDER_ID !== 'undefined' && DRIVE_FOLDER_ID) {
           showToast('กำลังยกเลิกสิทธิ์เข้าถึง Google Drive...', 'info');
           try {
@@ -216,11 +234,20 @@ const Users = {
   },
 
   async deleteUser(uid) {
-    if(!confirm('ยืนยันการลบผู้ใช้นี้ออกจากระบบ? (สิทธิ์เข้าถึงโฟลเดอร์ Google Drive จะถูกเพิกถอน และข้อมูลผู้ใช้จะถูกลบออกจากฐานข้อมูล)')) return;
+    if (uid === DMS.currentUser.uid) {
+      showToast('ไม่สามารถลบตัวเองได้', 'error');
+      return;
+    }
     try {
       const userDoc = await DMS.db.collection('users').doc(uid).get();
       if (userDoc.exists) {
-        const userEmail = userDoc.data().email;
+        const userData = userDoc.data();
+        if (userData.email && DMS.currentUser.email && userData.email.toLowerCase() === DMS.currentUser.email.toLowerCase()) {
+          showToast('ไม่สามารถลบตัวเองได้', 'error');
+          return;
+        }
+        if(!confirm('ยืนยันการลบผู้ใช้นี้ออกจากระบบ? (สิทธิ์เข้าถึงโฟลเดอร์ Google Drive จะถูกเพิกถอน และข้อมูลผู้ใช้จะถูกลบออกจากฐานข้อมูล)')) return;
+        const userEmail = userData.email;
         if (typeof DRIVE_FOLDER_ID !== 'undefined' && DRIVE_FOLDER_ID) {
           showToast('กำลังยกเลิกสิทธิ์เข้าถึง Google Drive...', 'info');
           try {
@@ -276,7 +303,7 @@ const Users = {
   
   renderUserRow(user) {
     const photo = user.photoURL || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.email);
-    const isMe = user.id === DMS.currentUser.uid;
+    const isMe = user.id === DMS.currentUser.uid || (user.email && DMS.currentUser.email && user.email.toLowerCase() === DMS.currentUser.email.toLowerCase());
     const statusBadge = user.status === 'suspended' 
       ? '<span class="role-badge" style="background: rgba(239,68,68,0.1); color: var(--danger-color);">ระงับ</span>'
       : '<span class="role-badge" style="background: rgba(16,185,129,0.1); color: var(--success-color);">ปกติ</span>';
