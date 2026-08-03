@@ -109,7 +109,7 @@ const Users = {
           showToast('เพิ่มสิทธิ์ Google Drive สำเร็จ');
         } catch (e) {
           console.warn('Failed to share Google Drive folder with user:', e);
-          showToast('แชร์โฟลเดอร์ Google Drive ไม่สำเร็จ กรุณาตรวจสอบสิทธิ์', 'warning');
+          showToast('แชร์โฟลเดอร์ Google Drive ไม่สำเร็จ: ' + e.message, 'warning');
         }
       }
 

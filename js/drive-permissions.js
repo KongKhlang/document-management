@@ -12,7 +12,10 @@ const DrivePermissions = {
           emailAddress: email
         })
       });
-      if (!response.ok) throw new Error(`Failed to add permission: ${response.statusText}`);
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(`ไม่สามารถแชร์สิทธิ์: ${response.status} - ${errText}`);
+      }
       return await response.json();
     } catch (error) {
       console.error('Error adding permission:', error);
