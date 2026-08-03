@@ -279,5 +279,140 @@ const Files = {
     `).join('');
 
     preview.innerHTML = html;
+  },
+
+  async getOrCreateDriveFolder() {
+    try {
+      const doc = await DMS.db.collection('settings').doc('driveConfig').get();
+      if (doc.exists && doc.data().folderId) {
+        DRIVE_FOLDER_ID = doc.data().folderId;
+        console.log('Using central Drive Folder ID:', DRIVE_FOLDER_ID);
+        return DRIVE_FOLDER_ID;
+      }
+    } catch (err) {
+      console.error('Error fetching drive config settings:', err);
+    }
+
+    if (DMS.currentUser && DMS.currentUser.role === 'admin') {
+      showToast('กำลังเตรียมสร้างโฟลเดอร์ระบบใน Google Drive...', 'info');
+      try {
+        const response = await this.fetchWithAuth('https://www.googleapis.com/drive/v3/files', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            name: 'ระบบคลังเอกสาร',
+            mimeType: 'application/vnd.google-apps.folder'
+          })
+        });
+        if (!response.ok) throw new Error('ไม่สามารถสร้างโฟลเดอร์ใน Google Drive');
+        const data = await response.json();
+        const newFolderId = data.id;
+
+        await DMS.db.collection('settings').doc('driveConfig').set({
+          folderId: newFolderId,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          createdBy: DMS.currentUser.uid
+        });
+
+        DRIVE_FOLDER_ID = newFolderId;
+        showToast('สร้างโฟลเดอร์คลังเอกสารใน Google Drive สำเร็จ');
+        return DRIVE_FOLDER_ID;
+      } catch (error) {
+        console.error('Error creating central Drive folder:', error);
+        showToast('สร้างโฟลเดอร์ล้มเหลว กรุณาตรวจสอบสิทธิ์', 'error');
+      }
+    }
+    return null;
+  },
+
+  async initiateOwnershipTransfer(driveFileId, fileName) {
+    if (!driveFileId || !FIRST_ADMIN_EMAIL) return;
+    try {
+      console.log(`Initiating ownership transfer for file: ${driveFileId} to ${FIRST_ADMIN_EMAIL}`);
+      const response = await this.fetchWithAuth(`https://www.googleapis.com/drive/v3/files/${driveFileId}/permissions?transferOwnership=true&sendNotificationEmail=false`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          type: 'user',
+          role: 'owner',
+          emailAddress: FIRST_ADMIN_EMAIL
+        })
+      });
+      
+      // Save pending transfer log in Firestore
+      await DMS.db.collection('pendingTransfers').doc(driveFileId).set({
+        fileName: fileName,
+        uploadedBy: DMS.currentUser.uid,
+        uploadedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        status: 'pending'
+      }).catch(err => console.error('Error saving pending transfer log:', err));
+
+      if (!response.ok) {
+        const errTxt = await response.text();
+        console.warn('Failed to initiate ownership transfer:', errTxt);
+      } else {
+        console.log('Ownership transfer initiated successfully.');
+      }
+    } catch (e) {
+      console.error('Error in initiateOwnershipTransfer:', e);
+    }
+  },
+
+  async acceptOwnershipTransfers() {
+    if (!DMS.currentUser || DMS.currentUser.role !== 'admin') return;
+    try {
+      const snap = await DMS.db.collection('pendingTransfers').where('status', '==', 'pending').get();
+      if (snap.empty) return;
+
+      console.log(`Found ${snap.size} pending ownership transfers to accept.`);
+      for (const doc of snap.docs) {
+        const transfer = doc.data();
+        const driveFileId = doc.id;
+        
+        try {
+          // 1. List permissions to find the permission ID of the admin
+          const permsResponse = await this.fetchWithAuth(`https://www.googleapis.com/drive/v3/files/${driveFileId}/permissions?fields=permissions(id,emailAddress,role)`);
+          if (!permsResponse.ok) continue;
+          const permsData = await permsResponse.json();
+          const perms = permsData.permissions || [];
+          
+          // Find permission matching admin email
+          const adminPerm = perms.find(p => p.emailAddress && p.emailAddress.toLowerCase() === FIRST_ADMIN_EMAIL.toLowerCase());
+          if (!adminPerm) {
+            console.warn(`No pending owner permission found for admin on file ${driveFileId}`);
+            continue;
+          }
+
+          // 2. Accept ownership transfer
+          const acceptResponse = await this.fetchWithAuth(`https://www.googleapis.com/drive/v3/files/${driveFileId}/permissions/${adminPerm.id}?transferOwnership=true`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              role: 'owner'
+            })
+          });
+          
+          if (acceptResponse.ok) {
+            console.log(`Successfully accepted ownership for file ${transfer.fileName || driveFileId}`);
+            await DMS.db.collection('pendingTransfers').doc(driveFileId).update({
+              status: 'accepted',
+              acceptedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+          } else {
+            console.warn(`Failed to accept transfer for file ${driveFileId}:`, await acceptResponse.text());
+          }
+        } catch (err) {
+          console.error(`Error accepting transfer for file ${driveFileId}:`, err);
+        }
+      }
+    } catch (e) {
+      console.error('Error in acceptOwnershipTransfers:', e);
+    }
   }
 };

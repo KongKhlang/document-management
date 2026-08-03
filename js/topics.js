@@ -430,6 +430,11 @@ const Topics = {
           });
           addedSize += origFile.size;
           addedCount++;
+
+          // Initiate ownership transfer if uploader is not admin
+          if (DMS.currentUser.role !== 'admin' && window.Files && typeof Files.initiateOwnershipTransfer === 'function') {
+            Files.initiateOwnershipTransfer(upRes.id, origFile.name);
+          }
         }
         
         await batch.commit();
@@ -752,6 +757,11 @@ const Topics = {
           });
           addedSize += file.size;
           addedCount++;
+
+          // Initiate ownership transfer if uploader is not admin
+          if (DMS.currentUser.role !== 'admin' && window.Files && typeof Files.initiateOwnershipTransfer === 'function') {
+            Files.initiateOwnershipTransfer(upRes.id, file.name);
+          }
         }
         
         await batch.commit();

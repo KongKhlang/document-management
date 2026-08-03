@@ -10,8 +10,8 @@ const firebaseConfig = {
 
 const GOOGLE_CLIENT_ID = '327686159059-e8sp3b64365g2n3ggkcb48rtis3h1asi.apps.googleusercontent.com';
 const GOOGLE_API_KEY = firebaseConfig.apiKey;
-const DRIVE_SCOPES = 'https://www.googleapis.com/auth/drive';
-const DRIVE_FOLDER_ID = '1dqrlfEofScWRlfny4tRf9faT0-0y1Ek-';
+const DRIVE_SCOPES = 'https://www.googleapis.com/auth/drive.file';
+let DRIVE_FOLDER_ID = '';
 const FIRST_ADMIN_EMAIL = 'charun.work99@gmail.com';
 
 firebase.initializeApp(firebaseConfig);
