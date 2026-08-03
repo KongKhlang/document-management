@@ -1,5 +1,6 @@
 const App = {
   async init() {
+    console.log('DMS Debug: App.init started. Current User:', DMS.currentUser);
     this.setupNavigation();
     this.setupTheme();
     this.setupSettingsDropdown();
@@ -9,14 +10,17 @@ const App = {
     if(Search.init) Search.init();
     if(Dashboard.init) Dashboard.init();
     
-    if (DMS.currentUser.role === 'admin') {
+    if (DMS.currentUser && DMS.currentUser.role === 'admin') {
       if(Users.init) Users.init();
     }
     
     // Load dynamic Drive Folder ID config & sync (safely after all scripts loaded)
+    console.log('DMS Debug: App.init checking window.Files:', !!window.Files);
     if (window.Files && typeof Files.getOrCreateDriveFolder === 'function') {
       try {
+        console.log('DMS Debug: Calling Files.getOrCreateDriveFolder...');
         await Files.getOrCreateDriveFolder();
+        console.log('DMS Debug: Files.getOrCreateDriveFolder finished. DRIVE_FOLDER_ID =', DRIVE_FOLDER_ID);
         const el = document.getElementById('driveFolderInfo');
         if (el) {
           el.textContent = DRIVE_FOLDER_ID ? `Folder: ${DRIVE_FOLDER_ID}` : 'Folder: None';
@@ -30,7 +34,7 @@ const App = {
           }, 3000);
         }
       } catch (err) {
-        console.error('Error initializing Drive Folder in App.init:', err);
+        console.error('DMS Debug: Error initializing Drive Folder in App.init:', err);
       }
     }
     
