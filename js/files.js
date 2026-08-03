@@ -282,24 +282,18 @@ const Files = {
   },
 
   async getOrCreateDriveFolder() {
-    console.log('DMS Debug: getOrCreateDriveFolder started. currentUser =', DMS.currentUser);
     try {
-      console.log('DMS Debug: Fetching firestore doc settings/driveConfig...');
       const doc = await DMS.db.collection('settings').doc('driveConfig').get();
-      console.log('DMS Debug: Doc exists =', doc.exists, 'data =', doc.exists ? doc.data() : null);
       if (doc.exists && doc.data().folderId) {
         DRIVE_FOLDER_ID = doc.data().folderId;
-        console.log('DMS Debug: Using central Drive Folder ID:', DRIVE_FOLDER_ID);
         return DRIVE_FOLDER_ID;
       }
     } catch (err) {
-      console.error('DMS Debug: Error fetching drive config settings:', err);
+      console.error('Error fetching drive config settings:', err);
       showToast('ดึงข้อมูลการตั้งค่า Drive ล้มเหลว: ' + err.message, 'warning');
     }
 
-    console.log('DMS Debug: getOrCreateDriveFolder check. currentUser =', !!DMS.currentUser, 'role =', DMS.currentUser?.role);
     if (DMS.currentUser && DMS.currentUser.role === 'admin') {
-      console.log('DMS Debug: User is admin. Creating central Google Drive folder...');
       showToast('กำลังเตรียมสร้างโฟลเดอร์ระบบใน Google Drive...', 'info');
       try {
         const response = await this.fetchWithAuth('https://www.googleapis.com/drive/v3/files', {
@@ -318,25 +312,20 @@ const Files = {
         }
         const data = await response.json();
         const newFolderId = data.id;
-        console.log('DMS Debug: Google Drive folder created successfully. folderId =', newFolderId);
 
-        console.log('DMS Debug: Saving folderId to Firestore settings/driveConfig...');
         await DMS.db.collection('settings').doc('driveConfig').set({
           folderId: newFolderId,
           createdAt: firebase.firestore.FieldValue.serverTimestamp(),
           createdBy: DMS.currentUser.uid
         });
-        console.log('DMS Debug: Firestore settings/driveConfig saved successfully.');
 
         DRIVE_FOLDER_ID = newFolderId;
         showToast('สร้างโฟลเดอร์คลังเอกสารใน Google Drive สำเร็จ');
         return DRIVE_FOLDER_ID;
       } catch (error) {
-        console.error('DMS Debug: Error creating central Drive folder:', error);
+        console.error('Error creating central Drive folder:', error);
         showToast('สร้างโฟลเดอร์ล้มเหลว: ' + error.message, 'error');
       }
-    } else {
-      console.log('DMS Debug: User is not admin or currentUser is null. Skipping folder creation.');
     }
     return null;
   },

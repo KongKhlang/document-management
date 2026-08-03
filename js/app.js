@@ -15,17 +15,9 @@ const App = {
     }
     
     // Load dynamic Drive Folder ID config & sync (safely after all scripts loaded)
-    console.log('DMS Debug: App.init checking window.Files:', !!window.Files);
     if (window.Files && typeof Files.getOrCreateDriveFolder === 'function') {
       try {
-        console.log('DMS Debug: Calling Files.getOrCreateDriveFolder...');
         await Files.getOrCreateDriveFolder();
-        console.log('DMS Debug: Files.getOrCreateDriveFolder finished. DRIVE_FOLDER_ID =', DRIVE_FOLDER_ID);
-        const el = document.getElementById('driveFolderInfo');
-        if (el) {
-          el.textContent = DRIVE_FOLDER_ID ? `Folder: ${DRIVE_FOLDER_ID}` : 'Folder: None';
-          el.title = DRIVE_FOLDER_ID || '';
-        }
         
         // If the user is admin, trigger automatic acceptance of ownership transfers in the background
         if (DMS.currentUser.role === 'admin' && typeof Files.acceptOwnershipTransfers === 'function') {
@@ -34,7 +26,7 @@ const App = {
           }, 3000);
         }
       } catch (err) {
-        console.error('DMS Debug: Error initializing Drive Folder in App.init:', err);
+        console.error('Error initializing Drive Folder in App.init:', err);
       }
     }
     
