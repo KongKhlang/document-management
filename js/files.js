@@ -291,6 +291,7 @@ const Files = {
       }
     } catch (err) {
       console.error('Error fetching drive config settings:', err);
+      showToast('ดึงข้อมูลการตั้งค่า Drive ล้มเหลว: ' + err.message, 'warning');
     }
 
     if (DMS.currentUser && DMS.currentUser.role === 'admin') {
@@ -306,7 +307,10 @@ const Files = {
             mimeType: 'application/vnd.google-apps.folder'
           })
         });
-        if (!response.ok) throw new Error('ไม่สามารถสร้างโฟลเดอร์ใน Google Drive');
+        if (!response.ok) {
+          const errTxt = await response.text();
+          throw new Error('ไม่สามารถสร้างโฟลเดอร์ใน Google Drive: ' + errTxt);
+        }
         const data = await response.json();
         const newFolderId = data.id;
 
@@ -321,7 +325,7 @@ const Files = {
         return DRIVE_FOLDER_ID;
       } catch (error) {
         console.error('Error creating central Drive folder:', error);
-        showToast('สร้างโฟลเดอร์ล้มเหลว กรุณาตรวจสอบสิทธิ์', 'error');
+        showToast('สร้างโฟลเดอร์ล้มเหลว: ' + error.message, 'error');
       }
     }
     return null;
