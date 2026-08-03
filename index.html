@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   
   <!-- CSS -->
-  <link rel="stylesheet" href="css/styles.css?v=1.0.33">
+  <link rel="stylesheet" href="css/styles.css?v=1.0.34">
   
   <!-- Firebase SDK (v10 modular via CDN compat) -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -93,7 +93,7 @@
             <span class="nav-icon">📁</span>
             <span class="sidebar-label">เอกสารทั้งหมด</span>
           </a>
-          <a href="#" id="navCategories" class="admin-only">
+          <a href="#" id="navCategories" class="editor-action">
             <span class="nav-icon">🏷️</span>
             <span class="sidebar-label">หมวดหมู่</span>
           </a>
@@ -221,7 +221,7 @@
                 <button id="btnViewGrid" class="btn-icon active">⊞</button>
                 <button id="btnViewList" class="btn-icon">☰</button>
               </div>
-              <button id="btnAddTopic" class="btn-action editor-action">
+              <button id="btnAddTopic" class="btn-action">
                 <span class="icon">+</span> เพิ่มเอกสาร
               </button>
             </div>
@@ -245,8 +245,8 @@
               <h2 id="topicDetailTitle" class="detail-page-title">ทดสอบ 1</h2>
             </div>
             <div class="detail-actions flex items-center gap-2">
-              <button id="btnEditTopic" class="btn-pill-grey editor-action">✏️ Edit</button>
-              <button id="btnDeleteTopic" class="btn-pill-red editor-action">🗑️ Delete</button>
+              <button id="btnEditTopic" class="btn-pill-grey">✏️ Edit</button>
+              <button id="btnDeleteTopic" class="btn-pill-red">🗑️ Delete</button>
             </div>
           </div>
 
@@ -288,7 +288,7 @@
                 <h3 class="files-card-header-title">
                   ไฟล์แนบ <span id="topicDetailFileCount">0 ไฟล์</span>
                 </h3>
-                <button id="btnUploadMore" class="btn-outline-pill editor-action">+ อัปโหลดไฟล์เพิ่ม</button>
+                <button id="btnUploadMore" class="btn-outline-pill">+ อัปโหลดไฟล์เพิ่ม</button>
               </div>
               <div id="topicFilesList" class="files-list">
                 <!-- File items rendered by JS -->
@@ -298,7 +298,7 @@
         </section>
 
         <!-- Categories Page (Admin) -->
-        <section id="categoriesPage" class="page hidden admin-only">
+        <section id="categoriesPage" class="page hidden editor-action">
           <div class="page-header flex-end" style="justify-content: flex-end;">
             <button id="btnAddCategory" class="btn-primary">+ เพิ่มหมวดหมู่</button>
           </div>
@@ -536,16 +536,16 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- Scripts -->
-  <script src="js/firebase-config.js?v=1.0.33"></script>
-  <script src="js/utils.js?v=1.0.33"></script>
-  <script src="js/auth.js?v=1.0.33"></script>
-  <script src="js/users.js?v=1.0.33"></script>
-  <script src="js/categories.js?v=1.0.33"></script>
-  <script src="js/topics.js?v=1.0.33"></script>
-  <script src="js/files.js?v=1.0.33"></script>
-  <script src="js/drive-permissions.js?v=1.0.33"></script>
-  <script src="js/search.js?v=1.0.33"></script>
-  <script src="js/dashboard.js?v=1.0.33"></script>
-  <script src="js/app.js?v=1.0.33"></script>
+  <script src="js/firebase-config.js?v=1.0.34"></script>
+  <script src="js/utils.js?v=1.0.34"></script>
+  <script src="js/auth.js?v=1.0.34"></script>
+  <script src="js/users.js?v=1.0.34"></script>
+  <script src="js/categories.js?v=1.0.34"></script>
+  <script src="js/topics.js?v=1.0.34"></script>
+  <script src="js/files.js?v=1.0.34"></script>
+  <script src="js/drive-permissions.js?v=1.0.34"></script>
+  <script src="js/search.js?v=1.0.34"></script>
+  <script src="js/dashboard.js?v=1.0.34"></script>
+  <script src="js/app.js?v=1.0.34"></script>
 </body>
 </html>

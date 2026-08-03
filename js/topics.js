@@ -300,15 +300,16 @@ const Topics = {
       
       if(fileCountEl) fileCountEl.textContent = `${topic.fileCount || 0} ไฟล์ (${formatFileSize(topic.totalSize || 0)})`;
 
-      const isEditor = DMS.currentUser.role === 'admin' || DMS.currentUser.role === 'editor' || topic.createdBy === DMS.currentUser.uid;
+      const canEditOrDelete = DMS.currentUser.role === 'admin' || topic.createdBy === DMS.currentUser.uid;
+      const canUploadMore = DMS.currentUser.role === 'admin' || DMS.currentUser.role === 'editor' || topic.createdBy === DMS.currentUser.uid;
       
       const btnEdit = document.getElementById('btnEditTopic');
       const btnDelete = document.getElementById('btnDeleteTopic');
       const btnUploadMore = document.getElementById('btnUploadMore');
       
-      if(btnEdit) btnEdit.classList.toggle('hidden', !isEditor);
-      if(btnDelete) btnDelete.classList.toggle('hidden', !isEditor);
-      if(btnUploadMore) btnUploadMore.classList.toggle('hidden', !isEditor);
+      if(btnEdit) btnEdit.classList.toggle('hidden', !canEditOrDelete);
+      if(btnDelete) btnDelete.classList.toggle('hidden', !canEditOrDelete);
+      if(btnUploadMore) btnUploadMore.classList.toggle('hidden', !canUploadMore);
 
       if(btnEdit) btnEdit.onclick = () => this.showTopicModal(topic);
       if(btnDelete) btnDelete.onclick = () => this.deleteTopic(topic.id);
@@ -336,7 +337,7 @@ const Topics = {
                   <button onclick="Files.downloadFile('${f.driveFileId}', '${escapeHtml(f.fileName)}', this)" class="btn-icon" title="ดาวน์โหลด">
                     ⬇️
                   </button>
-                  ${isEditor ? `
+                  ${canEditOrDelete ? `
                   <button onclick="Topics.deleteFile('${topicId}', '${f.id}', '${f.driveFileId}', ${f.fileSize})" class="btn-icon btn-icon-danger" title="ลบไฟล์">
                     🗑️
                   </button>
