@@ -139,24 +139,6 @@ const Auth = {
           break;
         case 'approved':
           DMS.currentUser = { uid: user.uid, ...userData };
-          
-          // Load dynamic Drive Folder ID config
-          if (window.Files && typeof Files.getOrCreateDriveFolder === 'function') {
-            await Files.getOrCreateDriveFolder();
-            const el = document.getElementById('driveFolderInfo');
-            if (el) {
-              el.textContent = DRIVE_FOLDER_ID ? `Folder: ${DRIVE_FOLDER_ID}` : 'Folder: None';
-              el.title = DRIVE_FOLDER_ID || '';
-            }
-          }
-
-          // If the user is admin, trigger automatic acceptance of ownership transfers in the background
-          if (DMS.currentUser.role === 'admin' && window.Files && typeof Files.acceptOwnershipTransfers === 'function') {
-            setTimeout(() => {
-              Files.acceptOwnershipTransfers();
-            }, 3000);
-          }
-
           this.showMainApp();
           this.setupInactivityListener();
           break;

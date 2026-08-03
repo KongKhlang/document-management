@@ -1,5 +1,5 @@
 const App = {
-  init() {
+  async init() {
     this.setupNavigation();
     this.setupTheme();
     this.setupSettingsDropdown();
@@ -11,6 +11,27 @@ const App = {
     
     if (DMS.currentUser.role === 'admin') {
       if(Users.init) Users.init();
+    }
+    
+    // Load dynamic Drive Folder ID config & sync (safely after all scripts loaded)
+    if (window.Files && typeof Files.getOrCreateDriveFolder === 'function') {
+      try {
+        await Files.getOrCreateDriveFolder();
+        const el = document.getElementById('driveFolderInfo');
+        if (el) {
+          el.textContent = DRIVE_FOLDER_ID ? `Folder: ${DRIVE_FOLDER_ID}` : 'Folder: None';
+          el.title = DRIVE_FOLDER_ID || '';
+        }
+        
+        // If the user is admin, trigger automatic acceptance of ownership transfers in the background
+        if (DMS.currentUser.role === 'admin' && typeof Files.acceptOwnershipTransfers === 'function') {
+          setTimeout(() => {
+            Files.acceptOwnershipTransfers();
+          }, 3000);
+        }
+      } catch (err) {
+        console.error('Error initializing Drive Folder in App.init:', err);
+      }
     }
     
     this.navigateTo('dashboard');
