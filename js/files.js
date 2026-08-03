@@ -212,6 +212,11 @@ const Files = {
 
     dropZone.addEventListener('click', () => fileInput.click());
     
+    const addMoreBtn = document.getElementById('btnAddMoreFilesBtn');
+    if (addMoreBtn) {
+      addMoreBtn.onclick = () => fileInput.click();
+    }
+    
     dropZone.addEventListener('dragover', (e) => {
       e.preventDefault();
       dropZone.classList.add('drop-zone-active');
@@ -258,10 +263,18 @@ const Files = {
     const preview = document.getElementById(previewId);
     if (!preview) return;
     
+    const dropZone = document.getElementById('topicDropZone');
+    const addMoreBtn = document.getElementById('btnAddMoreFilesBtn');
+    
     if (!files || files.length === 0) {
       preview.innerHTML = '';
+      if (dropZone) dropZone.classList.remove('hidden');
+      if (addMoreBtn) addMoreBtn.classList.add('hidden');
       return;
     }
+
+    if (dropZone) dropZone.classList.add('hidden');
+    if (addMoreBtn) addMoreBtn.classList.remove('hidden');
 
     const html = files.map((file, idx) => `
       <div class="file-preview-item">
