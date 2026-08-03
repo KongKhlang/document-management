@@ -207,3 +207,5 @@ const Auth = {
     localStorage.removeItem('googleAccessTokenTime');
   }
 };
+
+window.Auth = Auth;

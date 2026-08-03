@@ -135,10 +135,9 @@ const Dashboard = {
   },
   
   async loadRecentActivity() {
+    const listEl = document.getElementById('recentActivityList');
+    if(!listEl) return;
     try {
-      const listEl = document.getElementById('recentActivityList');
-      if(!listEl) return;
-      
       const snapshot = await DMS.db.collection('topics')
         .where('isDeleted', '==', false)
         .orderBy('createdAt', 'desc')

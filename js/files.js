@@ -430,3 +430,5 @@ const Files = {
     }
   }
 };
+
+window.Files = Files;
