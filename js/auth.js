@@ -143,6 +143,11 @@ const Auth = {
           // Load dynamic Drive Folder ID config
           if (window.Files && typeof Files.getOrCreateDriveFolder === 'function') {
             await Files.getOrCreateDriveFolder();
+            const el = document.getElementById('driveFolderInfo');
+            if (el) {
+              el.textContent = DRIVE_FOLDER_ID ? `Folder: ${DRIVE_FOLDER_ID}` : 'Folder: None';
+              el.title = DRIVE_FOLDER_ID || '';
+            }
           }
 
           // If the user is admin, trigger automatic acceptance of ownership transfers in the background
