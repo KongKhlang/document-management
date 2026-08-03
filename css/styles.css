@@ -83,6 +83,10 @@
   padding: 0;
 }
 
+button, input, select, textarea {
+  font-family: inherit;
+}
+
 html { scroll-behavior: smooth; }
 
 body {
@@ -122,6 +126,7 @@ a { text-decoration: none; color: inherit; }
 .flex-center { display: flex; justify-content: center; align-items: center; }
 .flex-1 { flex: 1; }
 .gap-2 { gap: 0.5rem; }
+.gap-3 { gap: 0.75rem; }
 .gap-4 { gap: 1rem; }
 .mt-2 { margin-top: 0.5rem; }
 .mt-4 { margin-top: 1rem; }
