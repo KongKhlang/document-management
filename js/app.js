@@ -1,6 +1,25 @@
 const App = {
   async init() {
-    console.log('DMS Debug: App.init started. Current User:', DMS.currentUser);
+    if (this.initialized) {
+      // If already initialized, just load/refresh data/folders for the logged in user without rebinding listeners
+      if (DMS.currentUser && DMS.currentUser.role === 'admin') {
+        if (Users.init) Users.init();
+      }
+      if (window.Files && typeof Files.getOrCreateDriveFolder === 'function') {
+        try {
+          await Files.getOrCreateDriveFolder();
+          if (DMS.currentUser && DMS.currentUser.role === 'admin' && typeof Files.acceptOwnershipTransfers === 'function') {
+            Files.acceptOwnershipTransfers();
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+      this.navigateTo('dashboard');
+      return;
+    }
+    this.initialized = true;
+
     this.setupNavigation();
     this.setupTheme();
     this.setupSettingsDropdown();
@@ -20,7 +39,7 @@ const App = {
         await Files.getOrCreateDriveFolder();
         
         // If the user is admin, trigger automatic acceptance of ownership transfers in the background
-        if (DMS.currentUser.role === 'admin' && typeof Files.acceptOwnershipTransfers === 'function') {
+        if (DMS.currentUser && DMS.currentUser.role === 'admin' && typeof Files.acceptOwnershipTransfers === 'function') {
           setTimeout(() => {
             Files.acceptOwnershipTransfers();
           }, 3000);
