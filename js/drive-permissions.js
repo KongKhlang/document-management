@@ -68,12 +68,18 @@ const DrivePermissions = {
   async listPermissions(fileId) {
     try {
       const response = await Files.fetchWithAuth(`https://www.googleapis.com/drive/v3/files/${fileId}/permissions?fields=permissions(id,emailAddress,role)`);
-      if (!response.ok) throw new Error(`Failed to list permissions: ${response.statusText}`);
+      if (!response.ok) {
+        console.warn(`Failed to list permissions with emailAddress, falling back to id/role only`);
+        const fallbackRes = await Files.fetchWithAuth(`https://www.googleapis.com/drive/v3/files/${fileId}/permissions?fields=permissions(id,role)`);
+        if (!fallbackRes.ok) return [];
+        const data = await fallbackRes.json();
+        return data.permissions || [];
+      }
       const data = await response.json();
       return data.permissions || [];
     } catch (error) {
       console.error('Error listing permissions:', error);
-      throw error;
+      return []; // Return empty array to prevent crashing and allow addPermission to proceed
     }
   }
 };

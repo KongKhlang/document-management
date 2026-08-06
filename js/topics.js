@@ -528,7 +528,7 @@ const Topics = {
       
     } catch (error) {
       console.error('Save share error:', error);
-      showToast('เกิดข้อผิดพลาดในการบันทึก', 'error');
+      showToast('เกิดข้อผิดพลาดในการบันทึก: ' + error.message, 'error');
     }
   },
 
@@ -808,7 +808,7 @@ const Topics = {
 
     } catch (error) {
       console.error('Submit error:', error);
-      showToast('เกิดข้อผิดพลาดในการบันทึก', 'error');
+      showToast('เกิดข้อผิดพลาดในการบันทึก: ' + error.message, 'error');
     } finally {
       btnSubmit.disabled = false;
       btnSubmit.innerHTML = originalText;
