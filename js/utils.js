@@ -28,7 +28,7 @@ function formatDateTime(timestamp) {
   });
 }
 
-function showToast(message, type = 'success') {
+function showToast(message, type = 'success', duration = 4000) {
   const container = document.getElementById('toastContainer');
   if (!container) return;
   const toast = document.createElement('div');
@@ -50,7 +50,7 @@ function showToast(message, type = 'success') {
     toast.classList.remove('toast-visible');
     toast.classList.add('toast-hide');
     setTimeout(() => toast.remove(), 300);
-  }, 4000);
+  }, duration);
 }
 
 function showLoading(elementId) {

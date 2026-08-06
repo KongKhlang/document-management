@@ -109,7 +109,11 @@ const Users = {
           showToast('เพิ่มสิทธิ์ Google Drive สำเร็จ');
         } catch (e) {
           console.warn('Failed to share Google Drive folder with user:', e);
-          showToast('แชร์โฟลเดอร์ Google Drive ไม่สำเร็จ: ' + e.message, 'warning');
+          let friendlyMsg = e.message;
+          if (e.message.includes('appNotAuthorizedToChild') || e.message.includes('affected by the operation on the parent')) {
+            friendlyMsg = 'เนื่องจากข้อจำกัดความปลอดภัยของ Google Drive (มีไฟล์ของผู้อื่นในโฟลเดอร์) กรุณาเข้าไปแชร์โฟลเดอร์ "ระบบคลังเอกสาร" ให้กับ ' + userEmail + ' ผ่านเว็บ Google Drive โดยตรงเพื่อเสร็จสิ้นกระบวนการ';
+          }
+          showToast('แชร์โฟลเดอร์ Google Drive ไม่สำเร็จ: ' + friendlyMsg, 'warning', 12000);
         }
       }
 
