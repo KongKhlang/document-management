@@ -32,7 +32,10 @@ const DrivePermissions = {
       const response = await Files.fetchWithAuth(`https://www.googleapis.com/drive/v3/files/${fileId}/permissions/${perm.id}`, {
         method: 'DELETE'
       });
-      if (!response.ok) throw new Error(`Failed to remove permission: ${response.statusText}`);
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(`Failed to remove permission: ${response.status} - ${errText}`);
+      }
     } catch (error) {
       console.error('Error removing permission:', error);
       throw error;
@@ -53,10 +56,18 @@ const DrivePermissions = {
         const toRemove = currentEmails.filter(email => !allowedEmails.includes(email));
         
         for (const email of toAdd) {
-          await this.addPermission(driveFileId, email);
+          try {
+            await this.addPermission(driveFileId, email);
+          } catch (e) {
+            console.warn(`Failed to add permission for ${email} on file ${driveFileId}:`, e);
+          }
         }
         for (const email of toRemove) {
-          await this.removePermission(driveFileId, email);
+          try {
+            await this.removePermission(driveFileId, email);
+          } catch (e) {
+            console.warn(`Failed to remove permission for ${email} on file ${driveFileId}:`, e);
+          }
         }
       }
     } catch (error) {

@@ -519,7 +519,12 @@ const Topics = {
       const syncCheckbox = document.getElementById('syncDriveCheckbox');
       if (syncCheckbox?.checked) {
         const allEmails = [DMS.currentUser.email, ...DMS.shareViewers];
-        await DrivePermissions.syncPermissions(DMS.currentTopicId, allEmails);
+        try {
+          await DrivePermissions.syncPermissions(DMS.currentTopicId, allEmails);
+        } catch (syncErr) {
+          console.warn('Failed to sync Drive permissions:', syncErr);
+          showToast('ซิงค์สิทธิ์ Google Drive บางส่วนไม่สำเร็จ แต่แก้ไขสิทธิ์บนระบบเรียบร้อย', 'warning');
+        }
       }
       
       showToast('บันทึกสิทธิ์การเข้าถึงสำเร็จ');
@@ -775,7 +780,12 @@ const Topics = {
       
       if (visibility === 'restricted' && DrivePermissions.syncPermissions) {
         const finalAllowed = [DMS.currentUser.email, ...DMS.tempAllowedViewers];
-        await DrivePermissions.syncPermissions(topicId, finalAllowed);
+        try {
+          await DrivePermissions.syncPermissions(topicId, finalAllowed);
+        } catch (syncErr) {
+          console.warn('Failed to sync Drive permissions:', syncErr);
+          showToast('บันทึกสิทธิ์ Google Drive บางส่วนไม่สำเร็จ แต่บันทึกข้อมูลเอกสารเรียบร้อย', 'warning');
+        }
       }
 
       for (const tag of this.tempTags) {
