@@ -173,7 +173,10 @@ const Files = {
     try {
       const response = await this.fetchWithAuth(`https://www.googleapis.com/drive/v3/files/${driveFileId}?alt=media`);
       
-      if (!response.ok) throw new Error('ดาวน์โหลดล้มเหลว');
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(`${response.status} - ${errText}`);
+      }
       
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
@@ -187,7 +190,7 @@ const Files = {
       showToast('ดาวน์โหลดไฟล์สำเร็จ');
     } catch (error) {
       console.error('Download Error:', error);
-      showToast('เกิดข้อผิดพลาดในการดาวน์โหลด', 'error');
+      showToast('เกิดข้อผิดพลาดในการดาวน์โหลด: ' + error.message, 'error');
     } finally {
       if (buttonEl) {
         buttonEl.innerHTML = originalHTML;
