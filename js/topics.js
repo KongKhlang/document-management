@@ -334,7 +334,7 @@ const Topics = {
                   </div>
                 </div>
                 <div class="file-actions">
-                  <button onclick="Files.downloadFile('${f.driveFileId}', '${escapeHtml(f.fileName)}', this)" class="btn-icon" title="ดาวน์โหลด">
+                  <button onclick="Files.downloadFile('${f.driveFileId}', '${escapeHtml(f.fileName)}', this, '${f.driveDownloadUrl || ''}')" class="btn-icon" title="ดาวน์โหลด">
                     ⬇️
                   </button>
                   ${canEditOrDelete ? `

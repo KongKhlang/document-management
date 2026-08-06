@@ -160,7 +160,7 @@ const Files = {
     }
   },
   
-  async downloadFile(driveFileId, fileName, buttonEl) {
+  async downloadFile(driveFileId, fileName, buttonEl, driveDownloadUrl) {
     let originalHTML = '';
     if (buttonEl) {
       originalHTML = buttonEl.innerHTML;
@@ -174,6 +174,11 @@ const Files = {
       const response = await this.fetchWithAuth(`https://www.googleapis.com/drive/v3/files/${driveFileId}?alt=media`);
       
       if (!response.ok) {
+        if (driveDownloadUrl) {
+          window.open(driveDownloadUrl, '_blank');
+          showToast('กำลังดาวน์โหลดไฟล์ผ่าน Google Drive...');
+          return;
+        }
         const errText = await response.text();
         throw new Error(`${response.status} - ${errText}`);
       }
