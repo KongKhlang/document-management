@@ -673,6 +673,18 @@ const Topics = {
       visibility = 'private';
     }
     
+    // Auto-add selected email from dropdown if user forgot to click "เพิ่ม"
+    if (visibility === 'restricted') {
+      const select = document.getElementById('viewerEmailSelect');
+      if (select && select.value) {
+        const val = select.value.trim().toLowerCase();
+        if (val && !DMS.tempAllowedViewers.some(e => e.toLowerCase() === val)) {
+          DMS.tempAllowedViewers.push(val);
+        }
+        select.value = '';
+      }
+    }
+    
     if (!title || !categoryId) {
       showToast('กรุณากรอกชื่อและเลือกหมวดหมู่', 'warning');
       return;
@@ -1002,3 +1014,5 @@ const Topics = {
     }
   }
 };
+
+window.Topics = Topics;

@@ -166,6 +166,8 @@ const App = {
   }
 };
 
+window.App = App;
+
 document.addEventListener('DOMContentLoaded', () => {
   if (Auth && typeof Auth.init === 'function') {
     Auth.init();

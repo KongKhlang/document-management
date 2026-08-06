@@ -200,3 +200,5 @@ const Categories = {
     this.renderCategoriesList();
   }
 };
+
+window.Categories = Categories;

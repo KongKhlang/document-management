@@ -349,3 +349,5 @@ const Users = {
     }
   }
 };
+
+window.Users = Users;
