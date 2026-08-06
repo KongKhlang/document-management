@@ -128,7 +128,7 @@ const Topics = {
         if (
           topic.visibility === 'public' ||
           topic.createdBy === DMS.currentUser.uid ||
-          (topic.allowedViewers && topic.allowedViewers.includes(DMS.currentUser.email)) ||
+          (topic.allowedViewers && topic.allowedViewers.some(email => email.toLowerCase() === DMS.currentUser.email.toLowerCase())) ||
           DMS.currentUser.role === 'admin'
         ) {
           results.push(topic);
@@ -254,7 +254,7 @@ const Topics = {
       // Access Control Verification
       const isOwner = topic.createdBy === DMS.currentUser.uid;
       const isAdmin = DMS.currentUser.role === 'admin';
-      const isAllowedViewer = topic.visibility === 'restricted' && topic.allowedViewers && topic.allowedViewers.includes(DMS.currentUser.email);
+      const isAllowedViewer = topic.visibility === 'restricted' && topic.allowedViewers && topic.allowedViewers.some(email => email.toLowerCase() === DMS.currentUser.email.toLowerCase());
       const isPublic = topic.visibility === 'public';
 
       if (!isOwner && !isAdmin && !isAllowedViewer && !isPublic) {
@@ -511,7 +511,7 @@ const Topics = {
     
     try {
       await DMS.db.collection('topics').doc(DMS.currentTopicId).update({
-        allowedViewers: DMS.shareViewers,
+        allowedViewers: DMS.shareViewers.map(email => email.toLowerCase()),
         visibility: DMS.shareViewers.length > 0 ? 'restricted' : 'public',
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
       });
@@ -706,7 +706,7 @@ const Topics = {
       };
 
       if (visibility === 'restricted') {
-        topicData.allowedViewers = DMS.tempAllowedViewers;
+        topicData.allowedViewers = DMS.tempAllowedViewers.map(email => email.toLowerCase());
       } else {
         topicData.allowedViewers = [];
       }
